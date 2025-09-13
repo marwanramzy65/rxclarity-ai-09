@@ -1,18 +1,100 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Pill, ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/hooks/use-toast";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    confirmPassword: "",
+    firstName: "",
+    lastName: "",
+    pharmacyName: ""
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { signUp, signIn, user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.id]: e.target.value
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement authentication logic with Supabase
-    console.log("Auth form submitted");
+    setLoading(true);
+
+    try {
+      if (isLogin) {
+        const { error } = await signIn(formData.email, formData.password);
+        if (error) {
+          toast({
+            title: "Error signing in",
+            description: error.message,
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Welcome back!",
+            description: "Successfully signed in."
+          });
+          navigate('/dashboard');
+        }
+      } else {
+        if (formData.password !== formData.confirmPassword) {
+          toast({
+            title: "Password mismatch",
+            description: "Passwords do not match.",
+            variant: "destructive"
+          });
+          return;
+        }
+
+        const userData = {
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          pharmacy_name: formData.pharmacyName
+        };
+
+        const { error } = await signUp(formData.email, formData.password, userData);
+        if (error) {
+          toast({
+            title: "Error creating account",
+            description: error.message,
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Account created!",
+            description: "Please check your email to verify your account."
+          });
+        }
+      }
+    } catch (error: any) {
+      toast({
+        title: "An error occurred",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -47,26 +129,35 @@ const Auth = () => {
                     <div className="space-y-2">
                       <Label htmlFor="firstName">First Name</Label>
                       <Input 
-                        id="firstName" 
+                        id="firstName"
+                        value={formData.firstName}
+                        onChange={handleInputChange}
                         placeholder="John" 
                         className="border-input focus:ring-primary"
+                        required
                       />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="lastName">Last Name</Label>
                       <Input 
-                        id="lastName" 
+                        id="lastName"
+                        value={formData.lastName}
+                        onChange={handleInputChange}
                         placeholder="Doe" 
                         className="border-input focus:ring-primary"
+                        required
                       />
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="pharmacy">Pharmacy Name</Label>
                     <Input 
-                      id="pharmacy" 
+                      id="pharmacyName"
+                      value={formData.pharmacyName}
+                      onChange={handleInputChange}
                       placeholder="Your Pharmacy Name" 
                       className="border-input focus:ring-primary"
+                      required
                     />
                   </div>
                 </>
@@ -75,8 +166,10 @@ const Auth = () => {
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input 
-                  id="email" 
-                  type="email" 
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
                   placeholder="pharmacist@example.com" 
                   className="border-input focus:ring-primary"
                   required
@@ -86,8 +179,10 @@ const Auth = () => {
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
                 <Input 
-                  id="password" 
-                  type="password" 
+                  id="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
                   className="border-input focus:ring-primary"
                   required
                 />
@@ -97,8 +192,10 @@ const Auth = () => {
                 <div className="space-y-2">
                   <Label htmlFor="confirmPassword">Confirm Password</Label>
                   <Input 
-                    id="confirmPassword" 
-                    type="password" 
+                    id="confirmPassword"
+                    type="password"
+                    value={formData.confirmPassword}
+                    onChange={handleInputChange}
                     className="border-input focus:ring-primary"
                     required
                   />
@@ -107,10 +204,11 @@ const Auth = () => {
 
               <Button 
                 type="submit" 
+                disabled={loading}
                 className="w-full bg-gradient-primary shadow-medical"
                 size="lg"
               >
-                {isLogin ? "Sign In" : "Create Account"}
+                {loading ? "Please wait..." : (isLogin ? "Sign In" : "Create Account")}
               </Button>
             </form>
 
@@ -127,12 +225,6 @@ const Auth = () => {
               </Button>
             </div>
 
-            <div className="mt-6 p-4 bg-muted/50 rounded-lg">
-              <p className="text-sm text-muted-foreground text-center">
-                <strong>Note:</strong> Authentication requires Supabase integration. 
-                Connect your project to Supabase to enable user authentication.
-              </p>
-            </div>
           </CardContent>
         </Card>
       </div>

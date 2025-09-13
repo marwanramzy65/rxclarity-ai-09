@@ -6,13 +6,14 @@ import { Pill, User, LogOut, Plus, History, AlertTriangle } from "lucide-react";
 import PrescriptionForm from "@/components/PrescriptionForm";
 import PrescriptionHistory from "@/components/PrescriptionHistory";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Dashboard = () => {
+  const { signOut, user } = useAuth();
   const [activeTab, setActiveTab] = useState("new-prescription");
 
-  const handleLogout = () => {
-    // TODO: Implement logout with Supabase
-    console.log("Logging out...");
+  const handleLogout = async () => {
+    await signOut();
   };
 
   return (
@@ -31,7 +32,7 @@ const Dashboard = () => {
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                 <User className="h-4 w-4" />
-                <span>Dr. Sarah Johnson</span>
+                <span>{user?.email || 'Pharmacist'}</span>
               </div>
               <Button variant="ghost" size="sm" onClick={handleLogout}>
                 <LogOut className="h-4 w-4 mr-2" />
@@ -45,7 +46,7 @@ const Dashboard = () => {
       <div className="container mx-auto px-4 py-8">
         {/* Welcome Section */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Welcome back, Dr. Johnson</h1>
+          <h1 className="text-3xl font-bold mb-2">Welcome back!</h1>
           <p className="text-muted-foreground">Process prescriptions and review insurance claims efficiently</p>
         </div>
 
