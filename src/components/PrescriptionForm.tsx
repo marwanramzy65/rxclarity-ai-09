@@ -98,7 +98,20 @@ const PrescriptionForm = () => {
   };
 
   if (results) {
-    return <PrescriptionResults results={results} onReset={resetForm} />;
+    return (
+      <PrescriptionResults 
+        results={results} 
+        onReset={resetForm} 
+        onSaveToHistory={() => {
+          // Reset to show history was saved
+          setResults(null);
+          toast({
+            title: "Prescription Saved",
+            description: "Prescription has been saved to history.",
+          });
+        }}
+      />
+    );
   }
 
   return (

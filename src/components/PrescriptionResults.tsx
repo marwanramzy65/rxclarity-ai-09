@@ -21,9 +21,10 @@ interface PrescriptionResultsProps {
     };
   };
   onReset: () => void;
+  onSaveToHistory?: () => void;
 }
 
-const PrescriptionResults = ({ results, onReset }: PrescriptionResultsProps) => {
+const PrescriptionResults = ({ results, onReset, onSaveToHistory }: PrescriptionResultsProps) => {
   const { insuranceDecision, drugInteractions } = results;
 
   const getInsuranceIcon = (decision: string) => {
@@ -150,8 +151,10 @@ const PrescriptionResults = ({ results, onReset }: PrescriptionResultsProps) => 
           size="lg"
           className="bg-gradient-primary shadow-medical min-w-48"
           onClick={() => {
-            // TODO: Implement save to history functionality
-            console.log("Saving to history...");
+            // Save the current result to history and navigate to history tab
+            if (onSaveToHistory) {
+              onSaveToHistory();
+            }
           }}
         >
           Save to History

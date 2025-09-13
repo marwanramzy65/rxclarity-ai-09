@@ -40,8 +40,11 @@ const mockHistory = [
 
 const PrescriptionHistory = () => {
   const handleViewDetails = (prescriptionId: string) => {
-    // TODO: Implement view details functionality
-    console.log("Viewing details for:", prescriptionId);
+    // Find the prescription and show its details
+    const prescription = mockHistory.find(p => p.id === prescriptionId);
+    if (prescription) {
+      alert(`Prescription Details:\n\nPatient: ${prescription.patientName}\nID: ${prescription.patientId}\nMedications: ${prescription.medications.join(', ')}\nDecision: ${prescription.insuranceDecision}\nInteractions: ${prescription.interactions}\nProcessing Time: ${prescription.processingTime}`);
+    }
   };
 
   return (

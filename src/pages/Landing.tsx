@@ -1,10 +1,12 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, Zap, Users, CheckCircle, ArrowRight, Pill, AlertTriangle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/pharma-hero.jpg";
 
 const Landing = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -23,10 +25,10 @@ const Landing = () => {
             <a href="#benefits" className="text-muted-foreground hover:text-foreground transition-colors">
               Benefits
             </a>
-            <Button variant="outline" className="mr-2">
+            <Button variant="outline" className="mr-2" onClick={() => navigate('/auth')}>
               Sign In
             </Button>
-            <Button className="bg-gradient-primary shadow-medical">
+            <Button className="bg-gradient-primary shadow-medical" onClick={() => navigate('/auth')}>
               Get Started
             </Button>
           </nav>
@@ -49,12 +51,9 @@ const Landing = () => {
                 and drug interaction safety checks. Process claims in seconds, not hours.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="bg-white text-primary hover:bg-white/90 shadow-elevated">
+                <Button size="lg" className="bg-white text-primary hover:bg-white/90 shadow-elevated" onClick={() => navigate('/auth')}>
                   Start Free Trial
                   <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
-                  Watch Demo
                 </Button>
               </div>
             </div>
@@ -197,7 +196,7 @@ const Landing = () => {
               <p className="text-muted-foreground mb-6">
                 Join hundreds of pharmacies already using PharmaVerse to streamline their operations
               </p>
-              <Button size="lg" className="w-full bg-gradient-primary shadow-medical">
+              <Button size="lg" className="w-full bg-gradient-primary shadow-medical" onClick={() => navigate('/auth')}>
                 Start Your Free Trial
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
