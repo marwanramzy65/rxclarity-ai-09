@@ -14,6 +14,152 @@ export type Database = {
   }
   public: {
     Tables: {
+      drug_interactions: {
+        Row: {
+          created_at: string
+          description: string
+          drug_pair: string[]
+          id: string
+          interaction_type: string
+          prescription_id: string
+          recommendation: string
+          severity: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          drug_pair: string[]
+          id?: string
+          interaction_type: string
+          prescription_id: string
+          recommendation: string
+          severity: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          drug_pair?: string[]
+          id?: string
+          interaction_type?: string
+          prescription_id?: string
+          recommendation?: string
+          severity?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drug_interactions_prescription_id_fkey"
+            columns: ["prescription_id"]
+            isOneToOne: false
+            referencedRelation: "prescriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      drugs: {
+        Row: {
+          created_at: string
+          generic_name: string | null
+          id: string
+          manufacturer: string | null
+          name: string
+          strength: string
+        }
+        Insert: {
+          created_at?: string
+          generic_name?: string | null
+          id?: string
+          manufacturer?: string | null
+          name: string
+          strength: string
+        }
+        Update: {
+          created_at?: string
+          generic_name?: string | null
+          id?: string
+          manufacturer?: string | null
+          name?: string
+          strength?: string
+        }
+        Relationships: []
+      }
+      prescription_drugs: {
+        Row: {
+          created_at: string
+          drug_id: string
+          id: string
+          prescription_id: string
+          quantity: number
+        }
+        Insert: {
+          created_at?: string
+          drug_id: string
+          id?: string
+          prescription_id: string
+          quantity?: number
+        }
+        Update: {
+          created_at?: string
+          drug_id?: string
+          id?: string
+          prescription_id?: string
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prescription_drugs_drug_id_fkey"
+            columns: ["drug_id"]
+            isOneToOne: false
+            referencedRelation: "drugs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prescription_drugs_prescription_id_fkey"
+            columns: ["prescription_id"]
+            isOneToOne: false
+            referencedRelation: "prescriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prescriptions: {
+        Row: {
+          created_at: string
+          id: string
+          insurance_decision: string | null
+          insurance_message: string | null
+          insurance_tier: string
+          patient_id: string
+          patient_name: string
+          processing_time: unknown | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          insurance_decision?: string | null
+          insurance_message?: string | null
+          insurance_tier?: string
+          patient_id: string
+          patient_name: string
+          processing_time?: unknown | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          insurance_decision?: string | null
+          insurance_message?: string | null
+          insurance_tier?: string
+          patient_id?: string
+          patient_name?: string
+          processing_time?: unknown | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string

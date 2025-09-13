@@ -9,6 +9,7 @@ import { Plus, X, Search, User, CreditCard, Pill, Loader2 } from "lucide-react";
 import DrugSearch from "@/components/DrugSearch";
 import PrescriptionResults from "@/components/PrescriptionResults";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SelectedDrug {
   id: string;
@@ -60,34 +61,46 @@ const PrescriptionForm = () => {
 
     setIsProcessing(true);
     
-    // Simulate API calls - in real implementation, these would call Supabase Edge Functions
-    setTimeout(() => {
-      const mockResults = {
-        insuranceDecision: {
-          finalDecision: "approved",
-          message: "All medications are covered under Standard tier policy. Approved for dispensing.",
-        },
-        drugInteractions: {
-          interactions: [
-            {
-              drug_pair: ["Metformin", "Lisinopril"],
-              severity: "Yellow",
-              interaction_type: "Minor",
-              description: "Monitor kidney function when using ACE inhibitors with Metformin.",
-              recommendation: "Regular kidney function monitoring recommended.",
-            }
-          ]
+    try {
+      // Call the process-prescription edge function
+      const { data, error } = await supabase.functions.invoke('process-prescription', {
+        body: {
+          patientName,
+          patientId,
+          insuranceTier,
+          selectedDrugs,
         }
+      });
+
+      if (error) {
+        console.error('Error processing prescription:', error);
+        throw new Error(error.message || 'Failed to process prescription');
+      }
+
+      // Format the results for the UI
+      const results = {
+        insuranceDecision: data.insuranceDecision,
+        drugInteractions: data.drugInteractions,
+        prescriptionId: data.prescriptionId,
+        processingTime: data.processingTime
       };
       
-      setResults(mockResults);
-      setIsProcessing(false);
+      setResults(results);
       
       toast({
         title: "Prescription Processed",
-        description: "Insurance approval and drug interaction check completed.",
+        description: `Insurance and interaction check completed in ${data.processingTime}.`,
       });
-    }, 3000);
+    } catch (error) {
+      console.error('Error processing prescription:', error);
+      toast({
+        title: "Processing Error",
+        description: error instanceof Error ? error.message : "Failed to process prescription. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const resetForm = () => {
@@ -103,11 +116,12 @@ const PrescriptionForm = () => {
         results={results} 
         onReset={resetForm} 
         onSaveToHistory={() => {
-          // Reset to show history was saved
+          // The prescription is automatically saved in the database
+          // Just reset the form and show confirmation
           setResults(null);
           toast({
             title: "Prescription Saved",
-            description: "Prescription has been saved to history.",
+            description: "Prescription has been saved to your history.",
           });
         }}
       />
@@ -259,7 +273,7 @@ const PrescriptionForm = () => {
         <CardContent className="pt-6">
           <p className="text-sm text-muted-foreground text-center">
             <strong>Note:</strong> Full functionality requires Supabase integration for database storage 
-            and LLM API calls. Currently showing demo data.
+            and LLM API calls. Currently showing real data from your database.
           </p>
         </CardContent>
       </Card>
