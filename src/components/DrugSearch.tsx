@@ -39,7 +39,7 @@ const DrugSearch = ({ onDrugSelect }: DrugSearchProps) => {
       }
       
       setDrugs(data || []);
-      setFilteredDrugs(data || []);
+      setFilteredDrugs([]);
     } catch (error) {
       console.error('Error fetching drugs:', error);
     } finally {
@@ -50,7 +50,7 @@ const DrugSearch = ({ onDrugSelect }: DrugSearchProps) => {
   const handleSearch = (value: string) => {
     setSearchTerm(value);
     if (value.trim() === "") {
-      setFilteredDrugs(drugs);
+      setFilteredDrugs([]);
     } else {
       const filtered = drugs.filter(drug =>
         drug.name.toLowerCase().includes(value.toLowerCase()) ||
@@ -87,7 +87,7 @@ const DrugSearch = ({ onDrugSelect }: DrugSearchProps) => {
         />
         
         {/* Search Results */}
-        {filteredDrugs.length > 0 && (
+        {searchTerm.trim() !== "" && filteredDrugs.length > 0 && (
           <div className="absolute z-10 w-full mt-1 bg-card border rounded-md shadow-elevated max-h-60 overflow-y-auto">
             {filteredDrugs.map((drug) => (
               <div
@@ -102,6 +102,7 @@ const DrugSearch = ({ onDrugSelect }: DrugSearchProps) => {
                   )}
                 </div>
                 <Button
+                  type="button"
                   size="sm"
                   onClick={() => onDrugSelect({ name: drug.name, strength: drug.strength })}
                   className="h-8 bg-gradient-primary shadow-medical"
