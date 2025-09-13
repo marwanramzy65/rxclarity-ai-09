@@ -104,7 +104,11 @@ const DrugSearch = ({ onDrugSelect }: DrugSearchProps) => {
                 <Button
                   type="button"
                   size="sm"
-                  onClick={() => onDrugSelect({ name: drug.name, strength: drug.strength })}
+                  onClick={() => {
+                    onDrugSelect({ name: drug.name, strength: drug.strength });
+                    setSearchTerm("");
+                    setFilteredDrugs([]);
+                  }}
                   className="h-8 bg-gradient-primary shadow-medical"
                 >
                   <Plus className="h-4 w-4 mr-1" />
