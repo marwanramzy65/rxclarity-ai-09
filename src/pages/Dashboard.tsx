@@ -136,8 +136,7 @@ const Dashboard = () => {
           <TabsList className="grid w-full grid-cols-2 h-12">
             <TabsTrigger value="new-prescription" className="flex items-center justify-center space-x-1 sm:space-x-2 text-sm">
               <Plus className="h-4 w-4" />
-              <span className="hidden xs:inline sm:inline">New Prescription</span>
-              <span className="xs:hidden">New</span>
+              <span className="">New Prescription</span>
             </TabsTrigger>
             <TabsTrigger value="history" className="flex items-center justify-center space-x-1 sm:space-x-2 text-sm">
               <History className="h-4 w-4" />
