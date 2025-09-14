@@ -254,19 +254,19 @@ const PrescriptionResults = ({ results, onReset, onSaveToHistory }: Prescription
       </Card>
 
       {/* Actions */}
-      <div className="flex justify-center space-x-4">
+      <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 px-4 sm:px-0">
         <Button 
           onClick={onReset}
           variant="outline"
           size="lg"
-          className="min-w-48"
+          className="w-full sm:min-w-48 sm:w-auto order-2 sm:order-1"
         >
           <RotateCcw className="mr-2 h-4 w-4" />
-          Process Another Prescription
+          <span className="text-sm sm:text-base">Process Another Prescription</span>
         </Button>
         <Button 
           size="lg"
-          className="bg-gradient-primary shadow-medical min-w-48"
+          className="bg-gradient-primary shadow-medical w-full sm:min-w-48 sm:w-auto order-1 sm:order-2"
           onClick={() => {
             // Save the current result to history and navigate to history tab
             if (onSaveToHistory) {
@@ -274,7 +274,7 @@ const PrescriptionResults = ({ results, onReset, onSaveToHistory }: Prescription
             }
           }}
         >
-          Save to History
+          <span className="text-sm sm:text-base">Save to History</span>
         </Button>
       </div>
     </div>
