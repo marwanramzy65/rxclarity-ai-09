@@ -78,56 +78,81 @@ const DrugSearch = ({ onDrugSelect }: DrugSearchProps) => {
   return (
     <div className="space-y-4">
       <div className="relative">
-        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
         <Input
           placeholder="Search for medications..."
           value={searchTerm}
           onChange={(e) => handleSearch(e.target.value)}
-          className="pl-10 border-input focus:ring-primary"
+          className="pl-10 border-input focus:ring-primary h-10 sm:h-auto"
         />
         
         {/* Search Results */}
         {searchTerm.trim() !== "" && filteredDrugs.length > 0 && (
-          <div className="absolute z-10 w-full mt-1 bg-card border rounded-md shadow-elevated max-h-60 overflow-y-auto">
-            {filteredDrugs.map((drug) => (
-              <div
-                key={drug.id}
-                className="p-3 hover:bg-muted border-b last:border-b-0 flex items-center justify-between"
-              >
-                <div className="flex items-center space-x-3 flex-1">
-                  <span className="font-medium">{drug.name}</span>
-                  <div className="flex gap-1 flex-wrap">
-                    {drug.strength.split(',').map((strength, index) => (
-                      <Badge key={index} variant="secondary" className="text-xs">
-                        {strength.trim()}
-                      </Badge>
-                    ))}
+          <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-[60vh] sm:max-h-60 overflow-y-auto">
+            <div className="py-1">
+              {filteredDrugs.map((drug) => (
+                <div
+                  key={drug.id}
+                  className="px-3 py-3 sm:py-2 hover:bg-accent/50 border-b border-border/50 last:border-b-0"
+                >
+                  {/* Mobile-first layout: stack elements vertically */}
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0 sm:space-x-3">
+                    {/* Drug info section */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3 space-y-1 sm:space-y-0">
+                        <span className="font-medium text-sm sm:text-base text-foreground truncate">{drug.name}</span>
+                        {drug.generic_name && drug.generic_name !== drug.name && (
+                          <span className="text-xs sm:text-sm text-muted-foreground truncate">({drug.generic_name})</span>
+                        )}
+                      </div>
+                      
+                      {/* Strengths as badges with horizontal scroll */}
+                      <div className="flex gap-1 mt-1 sm:mt-0 overflow-x-auto scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+                        <div className="flex gap-1 min-w-max">
+                          {drug.strength.split(',').map((strength, index) => (
+                            <Badge key={index} variant="secondary" className="text-xs whitespace-nowrap flex-shrink-0">
+                              {strength.trim()}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Action buttons section */}
+                    <div className="flex gap-1 overflow-x-auto scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent sm:overflow-visible">
+                      <div className="flex gap-1 min-w-max sm:min-w-0">
+                        {drug.strength.split(',').map((strength, index) => (
+                          <Button
+                            key={index}
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              onDrugSelect({ name: drug.name, strength: strength.trim() });
+                              setSearchTerm("");
+                              setFilteredDrugs([]);
+                            }}
+                            className="h-8 px-2 sm:px-3 text-xs whitespace-nowrap flex-shrink-0 hover:bg-primary hover:text-primary-foreground"
+                          >
+                            <Plus className="h-3 w-3 mr-1" />
+                            {strength.trim()}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                  {drug.generic_name && drug.generic_name !== drug.name && (
-                    <span className="text-sm text-muted-foreground">({drug.generic_name})</span>
-                  )}
                 </div>
-                <div className="flex gap-1">
-                  {drug.strength.split(',').map((strength, index) => (
-                    <Button
-                      key={index}
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        onDrugSelect({ name: drug.name, strength: strength.trim() });
-                        setSearchTerm("");
-                        setFilteredDrugs([]);
-                      }}
-                      className="h-8 px-2 text-xs"
-                    >
-                      <Plus className="h-3 w-3 mr-1" />
-                      {strength.trim()}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* No results message */}
+        {searchTerm.trim() !== "" && filteredDrugs.length === 0 && (
+          <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg">
+            <div className="px-4 py-6 text-center text-sm text-muted-foreground">
+              No medications found for "{searchTerm}"
+            </div>
           </div>
         )}
       </div>
