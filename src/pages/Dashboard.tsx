@@ -7,10 +7,12 @@ import PrescriptionForm from "@/components/PrescriptionForm";
 import PrescriptionHistory from "@/components/PrescriptionHistory";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDashboardStats } from "@/hooks/useDashboardStats";
 
 const Dashboard = () => {
   const { signOut, user } = useAuth();
   const [activeTab, setActiveTab] = useState("new-prescription");
+  const { stats, loading, error } = useDashboardStats();
 
   const handleLogout = async () => {
     await signOut();
@@ -57,7 +59,9 @@ const Dashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Today's Claims</p>
-                  <p className="text-2xl font-bold">24</p>
+                  <p className="text-2xl font-bold">
+                    {loading ? "..." : error ? "Error" : stats.todaysClaims}
+                  </p>
                 </div>
                 <div className="bg-primary/10 rounded-full p-3">
                   <Plus className="h-6 w-6 text-primary" />
@@ -71,9 +75,13 @@ const Dashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Approved</p>
-                  <p className="text-2xl font-bold text-success">18</p>
+                  <p className="text-2xl font-bold text-success">
+                    {loading ? "..." : error ? "Error" : stats.approvedCount}
+                  </p>
                 </div>
-                <StatusBadge variant="approved">75%</StatusBadge>
+                <StatusBadge variant="approved">
+                  {loading ? "..." : error ? "Error" : `${stats.approvedPercentage}%`}
+                </StatusBadge>
               </div>
             </CardContent>
           </Card>
@@ -83,7 +91,9 @@ const Dashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Interactions Found</p>
-                  <p className="text-2xl font-bold text-warning">3</p>
+                  <p className="text-2xl font-bold text-warning">
+                    {loading ? "..." : error ? "Error" : stats.interactionsFound}
+                  </p>
                 </div>
                 <AlertTriangle className="h-6 w-6 text-warning" />
               </div>
@@ -95,7 +105,9 @@ const Dashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Avg. Processing Time</p>
-                  <p className="text-2xl font-bold">2.4s</p>
+                  <p className="text-2xl font-bold">
+                    {loading ? "..." : error ? "Error" : stats.avgProcessingTime}
+                  </p>
                 </div>
                 <div className="bg-success/10 rounded-full p-3">
                   <History className="h-6 w-6 text-success" />
