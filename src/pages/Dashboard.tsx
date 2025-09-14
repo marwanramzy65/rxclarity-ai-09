@@ -2,9 +2,10 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Pill, User, LogOut, Plus, History, AlertTriangle } from "lucide-react";
+import { Pill, User, LogOut, Plus, History, AlertTriangle, BarChart3 } from "lucide-react";
 import PrescriptionForm from "@/components/PrescriptionForm";
 import PrescriptionHistory from "@/components/PrescriptionHistory";
+import DetailedStatsModal from "@/components/DetailedStatsModal";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
@@ -12,6 +13,7 @@ import { useDashboardStats } from "@/hooks/useDashboardStats";
 const Dashboard = () => {
   const { signOut, user } = useAuth();
   const [activeTab, setActiveTab] = useState("new-prescription");
+  const [detailedStatsOpen, setDetailedStatsOpen] = useState(false);
   const { stats, loading, error } = useDashboardStats();
 
   const handleLogout = async () => {
@@ -117,6 +119,18 @@ const Dashboard = () => {
           </Card>
         </div>
 
+        {/* View More Analytics Button */}
+        <div className="flex justify-center mb-6 sm:mb-8">
+          <Button 
+            variant="outline" 
+            onClick={() => setDetailedStatsOpen(true)}
+            className="bg-gradient-card border-primary/20 hover:bg-primary/5"
+          >
+            <BarChart3 className="h-4 w-4 mr-2" />
+            View More Analytics
+          </Button>
+        </div>
+
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
           <TabsList className="grid w-full grid-cols-2 h-12">
@@ -160,6 +174,12 @@ const Dashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
+      
+      {/* Detailed Stats Modal */}
+      <DetailedStatsModal 
+        open={detailedStatsOpen} 
+        onOpenChange={setDetailedStatsOpen} 
+      />
     </div>
   );
 };
