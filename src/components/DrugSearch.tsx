@@ -94,26 +94,38 @@ const DrugSearch = ({ onDrugSelect }: DrugSearchProps) => {
                 key={drug.id}
                 className="p-3 hover:bg-muted border-b last:border-b-0 flex items-center justify-between"
               >
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-3 flex-1">
                   <span className="font-medium">{drug.name}</span>
-                  <Badge variant="secondary">{drug.strength}</Badge>
+                  <div className="flex gap-1 flex-wrap">
+                    {drug.strength.split(',').map((strength, index) => (
+                      <Badge key={index} variant="secondary" className="text-xs">
+                        {strength.trim()}
+                      </Badge>
+                    ))}
+                  </div>
                   {drug.generic_name && drug.generic_name !== drug.name && (
                     <span className="text-sm text-muted-foreground">({drug.generic_name})</span>
                   )}
                 </div>
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={() => {
-                    onDrugSelect({ name: drug.name, strength: drug.strength });
-                    setSearchTerm("");
-                    setFilteredDrugs([]);
-                  }}
-                  className="h-8 bg-gradient-primary shadow-medical"
-                >
-                  <Plus className="h-4 w-4 mr-1" />
-                  Add
-                </Button>
+                <div className="flex gap-1">
+                  {drug.strength.split(',').map((strength, index) => (
+                    <Button
+                      key={index}
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        onDrugSelect({ name: drug.name, strength: strength.trim() });
+                        setSearchTerm("");
+                        setFilteredDrugs([]);
+                      }}
+                      className="h-8 px-2 text-xs"
+                    >
+                      <Plus className="h-3 w-3 mr-1" />
+                      {strength.trim()}
+                    </Button>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
