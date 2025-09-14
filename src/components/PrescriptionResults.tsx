@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { CheckCircle, AlertTriangle, XCircle, RotateCcw, Shield, CreditCard } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { CheckCircle, AlertTriangle, XCircle, RotateCcw, Shield, CreditCard, FileText, Eye } from "lucide-react";
 
 interface PrescriptionResultsProps {
   results: {
@@ -26,6 +28,50 @@ interface PrescriptionResultsProps {
 
 const PrescriptionResults = ({ results, onReset, onSaveToHistory }: PrescriptionResultsProps) => {
   const { insuranceDecision, drugInteractions } = results;
+  const [detailsOpen, setDetailsOpen] = useState(false);
+
+  // Parse insurance message for better formatting
+  const parseInsuranceMessage = (message: string) => {
+    try {
+      // Try to extract structured information from the message
+      const lines = message.split(/\n|\./).filter(line => line.trim());
+      const summary = lines[0]?.trim() || message;
+      
+      // Look for common patterns in insurance messages
+      const coverage = lines.find(line => 
+        line.toLowerCase().includes('coverage') || 
+        line.toLowerCase().includes('copay') ||
+        line.toLowerCase().includes('tier')
+      );
+      
+      const reasoning = lines.find(line => 
+        line.toLowerCase().includes('because') || 
+        line.toLowerCase().includes('due to') ||
+        line.toLowerCase().includes('reason')
+      );
+      
+      const requirements = lines.find(line => 
+        line.toLowerCase().includes('require') || 
+        line.toLowerCase().includes('need') ||
+        line.toLowerCase().includes('must')
+      );
+
+      return {
+        summary,
+        coverage,
+        reasoning,
+        requirements,
+        fullMessage: message
+      };
+    } catch {
+      return {
+        summary: message,
+        fullMessage: message
+      };
+    }
+  };
+
+  const parsedMessage = parseInsuranceMessage(insuranceDecision.message);
 
   const getInsuranceIcon = (decision: string) => {
     switch (decision.toLowerCase()) {
@@ -76,11 +122,82 @@ const PrescriptionResults = ({ results, onReset, onSaveToHistory }: Prescription
             </StatusBadge>
           </div>
           
-          <Alert className="border-l-4 border-l-primary">
-            <AlertDescription className="text-sm">
-              {insuranceDecision.message}
-            </AlertDescription>
-          </Alert>
+          <div className="space-y-3">
+            {/* Main summary */}
+            <div className="p-3 bg-muted/30 rounded-lg">
+              <p className="text-sm font-medium">{parsedMessage.summary}</p>
+            </div>
+            
+            {/* Additional parsed information */}
+            {parsedMessage.coverage && (
+              <div className="flex items-start space-x-2 text-sm">
+                <FileText className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                <span className="text-muted-foreground">{parsedMessage.coverage}</span>
+              </div>
+            )}
+            
+            {parsedMessage.requirements && (
+              <div className="flex items-start space-x-2 text-sm">
+                <AlertTriangle className="h-4 w-4 text-warning mt-0.5 flex-shrink-0" />
+                <span className="text-muted-foreground">{parsedMessage.requirements}</span>
+              </div>
+            )}
+
+            {/* View Details Dialog */}
+            <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="mt-2">
+                  <Eye className="h-4 w-4 mr-2" />
+                  View Full Details
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center space-x-2">
+                    <CreditCard className="h-5 w-5 text-primary" />
+                    <span>Complete Insurance Analysis</span>
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 mt-4">
+                  <div className="p-4 bg-muted/30 rounded-lg">
+                    <h4 className="font-semibold mb-2 flex items-center space-x-2">
+                      {getInsuranceIcon(insuranceDecision.finalDecision)}
+                      <span>Decision: {insuranceDecision.finalDecision.toUpperCase()}</span>
+                    </h4>
+                    <div className="space-y-3 text-sm">
+                      <div>
+                        <strong>Complete Message:</strong>
+                        <p className="mt-1 text-muted-foreground whitespace-pre-line">
+                          {parsedMessage.fullMessage}
+                        </p>
+                      </div>
+                      
+                      {parsedMessage.coverage && (
+                        <div>
+                          <strong>Coverage Details:</strong>
+                          <p className="mt-1 text-muted-foreground">{parsedMessage.coverage}</p>
+                        </div>
+                      )}
+                      
+                      {parsedMessage.reasoning && (
+                        <div>
+                          <strong>Reasoning:</strong>
+                          <p className="mt-1 text-muted-foreground">{parsedMessage.reasoning}</p>
+                        </div>
+                      )}
+                      
+                      {parsedMessage.requirements && (
+                        <div>
+                          <strong>Requirements:</strong>
+                          <p className="mt-1 text-muted-foreground">{parsedMessage.requirements}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
         </CardContent>
       </Card>
 
