@@ -129,37 +129,37 @@ const PrescriptionForm = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
         {/* Patient Information */}
         <Card className="bg-gradient-card border-0 shadow-card-medical">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center space-x-2">
-              <User className="h-5 w-5 text-primary" />
+          <CardHeader className="pb-3 sm:pb-4 px-4 sm:px-6">
+            <CardTitle className="flex items-center space-x-2 text-base sm:text-lg">
+              <User className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               <span>Patient Information</span>
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid md:grid-cols-2 gap-4">
+          <CardContent className="space-y-4 px-4 sm:px-6 pb-4 sm:pb-6">
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="patientName">Patient Name *</Label>
+                <Label htmlFor="patientName" className="text-sm">Patient Name *</Label>
                 <Input
                   id="patientName"
                   value={patientName}
                   onChange={(e) => setPatientName(e.target.value)}
                   placeholder="Enter patient full name"
-                  className="border-input focus:ring-primary"
+                  className="border-input focus:ring-primary h-10"
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="patientId">Government ID (14 digits) *</Label>
+                <Label htmlFor="patientId" className="text-sm">Government ID (14 digits) *</Label>
                 <Input
                   id="patientId"
                   value={patientId}
                   onChange={(e) => setPatientId(e.target.value.replace(/\D/g, '').slice(0, 14))}
                   placeholder="12345678901234"
-                  className="border-input focus:ring-primary"
+                  className="border-input focus:ring-primary h-10"
                   required
                 />
               </div>
@@ -169,20 +169,20 @@ const PrescriptionForm = () => {
 
         {/* Insurance Information */}
         <Card className="bg-gradient-card border-0 shadow-card-medical">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center space-x-2">
-              <CreditCard className="h-5 w-5 text-primary" />
+          <CardHeader className="pb-3 sm:pb-4 px-4 sm:px-6">
+            <CardTitle className="flex items-center space-x-2 text-base sm:text-lg">
+              <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               <span>Insurance Information</span>
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
             <div className="space-y-2">
-              <Label htmlFor="insuranceTier">Insurance Tier</Label>
+              <Label htmlFor="insuranceTier" className="text-sm">Insurance Tier</Label>
               <select
                 id="insuranceTier"
                 value={insuranceTier}
                 onChange={(e) => setInsuranceTier(e.target.value)}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
               >
                 <option value="Basic">Basic</option>
                 <option value="Standard">Standard</option>
@@ -195,13 +195,13 @@ const PrescriptionForm = () => {
 
         {/* Prescription Medications */}
         <Card className="bg-gradient-card border-0 shadow-card-medical">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center space-x-2">
-              <Pill className="h-5 w-5 text-primary" />
+          <CardHeader className="pb-3 sm:pb-4 px-4 sm:px-6">
+            <CardTitle className="flex items-center space-x-2 text-base sm:text-lg">
+              <Pill className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               <span>Prescription Medications</span>
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 px-4 sm:px-6 pb-4 sm:pb-6">
             <DrugSearch onDrugSelect={addDrug} />
             
             {selectedDrugs.length > 0 && (
@@ -210,26 +210,28 @@ const PrescriptionForm = () => {
                 <div className="space-y-3">
                   <h4 className="font-medium text-sm text-muted-foreground">Selected Medications:</h4>
                   {selectedDrugs.map((drug) => (
-                    <div key={drug.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                    <div key={drug.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-muted/50 rounded-lg space-y-2 sm:space-y-0">
                       <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-1">
-                          <span className="font-medium">{drug.name}</span>
-                          <Badge variant="secondary">{drug.strength}</Badge>
+                        <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
+                          <span className="font-medium text-sm sm:text-base">{drug.name}</span>
+                          <Badge variant="secondary" className="w-fit text-xs">{drug.strength}</Badge>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Label htmlFor={`quantity-${drug.id}`} className="text-xs text-muted-foreground">
-                          Qty:
-                        </Label>
-                        <Input
-                          id={`quantity-${drug.id}`}
-                          type="number"
-                          min="1"
-                          max="90"
-                          value={drug.quantity}
-                          onChange={(e) => updateQuantity(drug.id, parseInt(e.target.value) || 1)}
-                          className="w-16 h-8 text-xs"
-                        />
+                      <div className="flex items-center justify-between sm:justify-end space-x-2">
+                        <div className="flex items-center space-x-2">
+                          <Label htmlFor={`quantity-${drug.id}`} className="text-xs text-muted-foreground">
+                            Qty:
+                          </Label>
+                          <Input
+                            id={`quantity-${drug.id}`}
+                            type="number"
+                            min="1"
+                            max="90"
+                            value={drug.quantity}
+                            onChange={(e) => updateQuantity(drug.id, parseInt(e.target.value) || 1)}
+                            className="w-16 h-8 text-xs"
+                          />
+                        </div>
                         <Button
                           type="button"
                           variant="ghost"
@@ -253,16 +255,16 @@ const PrescriptionForm = () => {
           <Button 
             type="submit" 
             size="lg" 
-            className="bg-gradient-primary shadow-medical min-w-48"
+            className="bg-gradient-primary shadow-medical w-full sm:w-auto sm:min-w-48"
             disabled={isProcessing}
           >
             {isProcessing ? (
               <>
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Processing...
+                <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                <span className="text-sm sm:text-base">Processing...</span>
               </>
             ) : (
-              "Process Prescription"
+              <span className="text-sm sm:text-base">Process Prescription</span>
             )}
           </Button>
         </div>
