@@ -268,15 +268,6 @@ const PrescriptionForm = () => {
         </div>
       </form>
 
-      {/* Backend Integration Notice */}
-      <Card className="border-warning/50 bg-warning/5">
-        <CardContent className="pt-6">
-          <p className="text-sm text-muted-foreground text-center">
-            <strong>Note:</strong> Full functionality requires Supabase integration for database storage 
-            and LLM API calls. Currently showing real data from your database.
-          </p>
-        </CardContent>
-      </Card>
     </div>
   );
 };
