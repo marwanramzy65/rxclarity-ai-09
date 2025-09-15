@@ -215,7 +215,7 @@ const Landing = () => {
             </span>
           </div>
           <p className="text-center text-muted-foreground">
-            © 2024 PharmaVerse. Revolutionizing pharmaceutical insurance processing.
+            © 2025 PharmaVerse. Revolutionizing pharmaceutical insurance processing.
           </p>
         </div>
       </footer>
