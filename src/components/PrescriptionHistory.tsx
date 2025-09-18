@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Eye, Calendar, User, Pill, AlertTriangle, CheckCircle, Clock, CreditCard, Shield, FileText, XCircle } from "lucide-react";
 import { usePrescriptions } from "@/hooks/usePrescriptions";
+import { GrievanceForm } from "@/components/GrievanceForm";
+import { GrievanceStatus } from "@/components/GrievanceStatus";
 
 const PrescriptionHistory = () => {
   const { prescriptions, loading, error } = usePrescriptions();
@@ -298,7 +300,30 @@ const PrescriptionHistory = () => {
                                   })()}
                                 </>
                               )}
+                              
+                              {/* Show grievance form for denied/limited prescriptions */}
+                              {(prescription.insurance_decision?.toLowerCase() === 'denied' || 
+                                prescription.insurance_decision?.toLowerCase() === 'limited') && (
+                                <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                                  <div className="flex items-center justify-between">
+                                    <div>
+                                      <p className="text-sm font-medium text-orange-800 mb-1">
+                                        {prescription.insurance_decision?.toLowerCase() === 'denied' 
+                                          ? 'Prescription Denied?' 
+                                          : 'Limited Coverage?'}
+                                      </p>
+                                      <p className="text-xs text-orange-600">
+                                        Submit an appeal if you believe this decision needs review.
+                                      </p>
+                                    </div>
+                                    <GrievanceForm prescriptionId={prescription.id} />
+                                  </div>
+                                </div>
+                              )}
                             </div>
+                            
+                            {/* Show grievance status if exists */}
+                            <GrievanceStatus prescriptionId={prescription.id} />
                           </div>
 
                           {/* Drug Interactions */}
