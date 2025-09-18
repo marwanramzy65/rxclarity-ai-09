@@ -116,37 +116,15 @@ Analyze the prescription and provide the insurance decision:`;
     // Parse the JSON response
     let insuranceDecision;
     try {
-      // Remove potential markdown formatting and extract JSON
-      let cleanedText = generatedText.replace(/```json|```/g, '').trim();
-      
-      // Try to find JSON object in the response
-      const jsonMatch = cleanedText.match(/\{[^}]*"finalDecision"[^}]*\}/s);
-      if (jsonMatch) {
-        cleanedText = jsonMatch[0];
-      }
-      
+      // Remove potential markdown formatting
+      const cleanedText = generatedText.replace(/```json|```/g, '').trim();
       insuranceDecision = JSON.parse(cleanedText);
-      
-      // Validate required fields
-      if (!insuranceDecision.finalDecision || !insuranceDecision.message) {
-        throw new Error('Missing required fields in response');
-      }
     } catch (parseError) {
       console.error('Failed to parse Groq response:', generatedText);
-      console.error('Parse error:', parseError);
-      
-      // Try to extract decision from text if JSON parsing fails
-      let fallbackDecision = "approved";
-      if (generatedText.toLowerCase().includes('denied')) {
-        fallbackDecision = "denied";
-      } else if (generatedText.toLowerCase().includes('limited')) {
-        fallbackDecision = "limited";
-      }
-      
       // Fallback decision
       insuranceDecision = {
-        finalDecision: fallbackDecision,
-        message: "Coverage decision made based on standard policy. Manual review may be required for final determination."
+        finalDecision: "approved",
+        message: "Coverage approved under standard policy. Manual review may be required for final determination."
       };
     }
 
