@@ -1,10 +1,1 @@
 project_id = "esmesnsparlcnxjbihtu"
-
-[functions.drug-interaction-check]
-verify_jwt = false
-
-[functions.insurance-check]
-verify_jwt = false
-
-[functions.process-prescription]
-verify_jwt = true
