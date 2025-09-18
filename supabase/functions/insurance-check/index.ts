@@ -116,11 +116,38 @@ Analyze the prescription and provide the insurance decision:`;
     // Parse the JSON response
     let insuranceDecision;
     try {
-      // Remove potential markdown formatting
-      const cleanedText = generatedText.replace(/```json|```/g, '').trim();
-      insuranceDecision = JSON.parse(cleanedText);
+      // Try multiple parsing strategies
+      let jsonText = generatedText;
+      
+      // Strategy 1: Look for JSON block in markdown
+      const jsonMatch = generatedText.match(/```json\s*(\{.*?\})\s*```/s);
+      if (jsonMatch) {
+        jsonText = jsonMatch[1];
+      } else {
+        // Strategy 2: Look for standalone JSON object
+        const standaloneMatch = generatedText.match(/\{[^{}]*"finalDecision"[^{}]*\}/s);
+        if (standaloneMatch) {
+          jsonText = standaloneMatch[0];
+        } else {
+          // Strategy 3: Remove everything before first { and after last }
+          const firstBrace = generatedText.indexOf('{');
+          const lastBrace = generatedText.lastIndexOf('}');
+          if (firstBrace !== -1 && lastBrace !== -1 && firstBrace < lastBrace) {
+            jsonText = generatedText.substring(firstBrace, lastBrace + 1);
+          }
+        }
+      }
+      
+      insuranceDecision = JSON.parse(jsonText.trim());
+      
+      // Validate required fields
+      if (!insuranceDecision.finalDecision || !insuranceDecision.message) {
+        throw new Error('Missing required fields in insurance decision');
+      }
+      
     } catch (parseError) {
       console.error('Failed to parse Groq response:', generatedText);
+      console.error('Parse error:', parseError.message);
       // Fallback decision
       insuranceDecision = {
         finalDecision: "approved",
