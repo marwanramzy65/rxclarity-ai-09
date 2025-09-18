@@ -202,16 +202,20 @@ const PrescriptionResults = ({ results, onReset, onSaveToHistory }: Prescription
             </Dialog>
           </div>
           
-          {/* Show grievance form for denied prescriptions */}
-          {insuranceDecision.finalDecision.toLowerCase() === 'denied' && results.prescriptionId && (
+          {/* Show grievance form for denied/limited prescriptions */}
+          {(insuranceDecision.finalDecision.toLowerCase() === 'denied' || 
+            insuranceDecision.finalDecision.toLowerCase() === 'limited') && 
+           results.prescriptionId && (
             <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-orange-800 mb-1">
-                    Prescription Denied?
+                    {insuranceDecision.finalDecision.toLowerCase() === 'denied' 
+                      ? 'Prescription Denied?' 
+                      : 'Limited Coverage?'}
                   </p>
                   <p className="text-xs text-orange-600">
-                    You can submit an appeal if you believe this decision is incorrect.
+                    You can submit an appeal if you believe this decision needs review.
                   </p>
                 </div>
                 <GrievanceForm prescriptionId={results.prescriptionId} />
