@@ -5,9 +5,12 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Plus, X, Search, User, CreditCard, Pill, Loader2 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus, X, Search, User, CreditCard, Pill, Loader2, Camera, Edit3 } from "lucide-react";
 import DrugSearch from "@/components/DrugSearch";
 import PrescriptionResults from "@/components/PrescriptionResults";
+import PrescriptionPhotoUpload from "@/components/PrescriptionPhotoUpload";
+import MedicationReview from "@/components/MedicationReview";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -18,6 +21,30 @@ interface SelectedDrug {
   quantity: number;
 }
 
+interface ExtractedMedication {
+  name: string;
+  strength: string;
+  directions: string;
+  found: boolean;
+  dbMatch?: {
+    id: string;
+    name: string;
+    strength: string;
+    generic_name: string;
+  };
+}
+
+interface ReviewedMedication extends ExtractedMedication {
+  id: string;
+  confirmed: boolean;
+  quantity: number;
+  editedName?: string;
+  editedStrength?: string;
+  editedDirections?: string;
+}
+
+type FormMode = 'selection' | 'photo-upload' | 'medication-review' | 'manual-entry';
+
 const PrescriptionForm = () => {
   const [patientName, setPatientName] = useState("");
   const [patientId, setPatientId] = useState("");
@@ -25,6 +52,9 @@ const PrescriptionForm = () => {
   const [selectedDrugs, setSelectedDrugs] = useState<SelectedDrug[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [results, setResults] = useState<any>(null);
+  const [formMode, setFormMode] = useState<FormMode>('selection');
+  const [extractedMedications, setExtractedMedications] = useState<ExtractedMedication[]>([]);
+  const [notFoundMedications, setNotFoundMedications] = useState<ReviewedMedication[]>([]);
   const { toast } = useToast();
 
   const addDrug = (drug: { name: string; strength: string }) => {
@@ -77,12 +107,13 @@ const PrescriptionForm = () => {
         throw new Error(error.message || 'Failed to process prescription');
       }
 
-      // Format the results for the UI
+      // Format the results for the UI including not found medications
       const results = {
         insuranceDecision: data.insuranceDecision,
         drugInteractions: data.drugInteractions,
         prescriptionId: data.prescriptionId,
-        processingTime: data.processingTime
+        processingTime: data.processingTime,
+        notFoundMedications: notFoundMedications // Include medications that weren't found
       };
       
       setResults(results);
@@ -103,11 +134,37 @@ const PrescriptionForm = () => {
     }
   };
 
+  const handleMedicationsExtracted = (medications: ExtractedMedication[]) => {
+    setExtractedMedications(medications);
+    setFormMode('medication-review');
+  };
+
+  const handleMedicationsReviewed = (reviewedMeds: ReviewedMedication[]) => {
+    // Separate found and not found medications
+    const foundMeds = reviewedMeds.filter(med => med.found && med.confirmed);
+    const notFoundMeds = reviewedMeds.filter(med => !med.found && med.confirmed);
+    
+    // Convert found medications to SelectedDrug format
+    const drugsToProcess: SelectedDrug[] = foundMeds.map(med => ({
+      id: med.id,
+      name: med.editedName || med.name,
+      strength: med.editedStrength || med.strength,
+      quantity: med.quantity,
+    }));
+
+    setSelectedDrugs(drugsToProcess);
+    setNotFoundMedications(notFoundMeds);
+    setFormMode('manual-entry');
+  };
+
   const resetForm = () => {
     setPatientName("");
     setPatientId("");
     setSelectedDrugs([]);
     setResults(null);
+    setFormMode('selection');
+    setExtractedMedications([]);
+    setNotFoundMedications([]);
   };
 
   if (results) {
@@ -128,8 +185,69 @@ const PrescriptionForm = () => {
     );
   }
 
+  if (formMode === 'photo-upload') {
+    return (
+      <PrescriptionPhotoUpload
+        onMedicationsExtracted={handleMedicationsExtracted}
+        onCancel={() => setFormMode('selection')}
+      />
+    );
+  }
+
+  if (formMode === 'medication-review') {
+    return (
+      <MedicationReview
+        medications={extractedMedications}
+        onConfirm={handleMedicationsReviewed}
+        onBack={() => setFormMode('selection')}
+      />
+    );
+  }
+
+  // Selection mode - choose between photo upload or manual entry
+  if (formMode === 'selection') {
+    return (
+      <Card className="bg-gradient-card border-0 shadow-card-medical">
+        <CardHeader className="pb-3 sm:pb-4 px-4 sm:px-6">
+          <CardTitle className="text-base sm:text-lg text-center">Choose Input Method</CardTitle>
+        </CardHeader>
+        <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Button
+              variant="outline"
+              className="h-32 flex flex-col space-y-2 bg-gradient-card hover:bg-primary/5"
+              onClick={() => setFormMode('photo-upload')}
+            >
+              <Camera className="h-8 w-8 text-primary" />
+              <span className="font-medium">Upload Prescription Photo</span>
+              <span className="text-xs text-muted-foreground">AI will extract medications</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-32 flex flex-col space-y-2 bg-gradient-card hover:bg-primary/5"
+              onClick={() => setFormMode('manual-entry')}
+            >
+              <Edit3 className="h-8 w-8 text-primary" />
+              <span className="font-medium">Manual Entry</span>
+              <span className="text-xs text-muted-foreground">Enter medications manually</span>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Manual entry mode
   return (
     <div className="space-y-4 sm:space-y-6">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-medium">Manual Prescription Entry</h3>
+        <Button variant="ghost" size="sm" onClick={() => setFormMode('selection')}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Selection
+        </Button>
+      </div>
+      
       <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
         {/* Patient Information */}
         <Card className="bg-gradient-card border-0 shadow-card-medical">
