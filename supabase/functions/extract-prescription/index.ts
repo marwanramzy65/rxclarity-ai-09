@@ -55,7 +55,7 @@ serve(async (req) => {
     console.log('Sending image to Azure AI for processing...');
     
     // Call Azure AI service
-    const response = await fetch('https://pharmaverse.services.ai.azure.com/models/v1/chat/completions', {
+    const response = await fetch('https://pharmaverse.services.ai.azure.com/api/models/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${azureApiKey}`,
