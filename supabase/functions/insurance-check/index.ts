@@ -87,7 +87,7 @@ Analyze the prescription and provide the insurance decision:`;
         'Authorization': `Bearer ${llamaApiKey}`,
       },
       body: JSON.stringify({
-        model: 'llama-3.1-70b-versatile',
+        model: 'llama3-70b-8192',
         messages: [{
           role: 'user',
           content: prompt
@@ -98,8 +98,10 @@ Analyze the prescription and provide the insurance decision:`;
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
       console.error('Groq API error:', response.status, response.statusText);
-      throw new Error(`Groq API error: ${response.status}`);
+      console.error('Groq API error details:', errorText);
+      throw new Error(`Groq API error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
