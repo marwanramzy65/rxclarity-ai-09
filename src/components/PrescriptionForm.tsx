@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, X, Search, User, CreditCard, Pill, Loader2, Camera, Edit3 } from "lucide-react";
+import { Plus, X, Search, User, CreditCard, Pill, Loader2, Camera, Edit3, ArrowLeft } from "lucide-react";
 import DrugSearch from "@/components/DrugSearch";
 import PrescriptionResults from "@/components/PrescriptionResults";
 import PrescriptionPhotoUpload from "@/components/PrescriptionPhotoUpload";
