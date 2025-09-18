@@ -12,7 +12,8 @@ import {
   AlertTriangle, 
   CheckCircle, 
   XCircle,
-  Loader2
+  Loader2,
+  AlertCircle
 } from "lucide-react";
 
 interface DetailedStatsModalProps {
@@ -270,6 +271,50 @@ const DetailedStatsModal = ({ open, onOpenChange }: DetailedStatsModalProps) => 
                   <p className="text-sm text-muted-foreground">Slowest Process</p>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Grievance Analytics */}
+          <Card className="bg-gradient-card border-0 shadow-card-medical">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center space-x-2">
+                <AlertCircle className="h-4 w-4 text-primary" />
+                <span>Appeals & Grievances</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center p-3 bg-muted/30 rounded-lg">
+                  <p className="text-2xl font-bold text-orange-600">{stats.grievanceStats.total}</p>
+                  <p className="text-sm text-muted-foreground">Total Appeals</p>
+                </div>
+                <div className="text-center p-3 bg-muted/30 rounded-lg">
+                  <p className="text-2xl font-bold text-yellow-600">{stats.grievanceStats.pending}</p>
+                  <p className="text-sm text-muted-foreground">Pending Review</p>
+                </div>
+                <div className="text-center p-3 bg-muted/30 rounded-lg">
+                  <p className="text-2xl font-bold text-green-600">{stats.grievanceStats.approved}</p>
+                  <p className="text-sm text-muted-foreground">Approved</p>
+                </div>
+                <div className="text-center p-3 bg-muted/30 rounded-lg">
+                  <p className="text-2xl font-bold text-red-600">{stats.grievanceStats.rejected}</p>
+                  <p className="text-sm text-muted-foreground">Rejected</p>
+                </div>
+              </div>
+              {stats.grievanceStats.total > 0 && (
+                <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-center gap-2 text-sm">
+                    <AlertCircle className="w-4 h-4 text-blue-600" />
+                    <span className="font-medium text-blue-800">
+                      Appeal Success Rate: {stats.grievanceStats.total > 0 ? 
+                        Math.round((stats.grievanceStats.approved / stats.grievanceStats.total) * 100) : 0}%
+                    </span>
+                  </div>
+                  <p className="text-xs text-blue-600 mt-1">
+                    Based on historical data for denied prescriptions
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

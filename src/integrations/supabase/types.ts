@@ -82,6 +82,53 @@ export type Database = {
         }
         Relationships: []
       }
+      grievances: {
+        Row: {
+          created_at: string
+          document_url: string | null
+          explanation: string
+          id: string
+          prescription_id: string
+          reviewed_at: string | null
+          reviewer_notes: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          document_url?: string | null
+          explanation: string
+          id?: string
+          prescription_id: string
+          reviewed_at?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          document_url?: string | null
+          explanation?: string
+          id?: string
+          prescription_id?: string
+          reviewed_at?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grievances_prescription_id_fkey"
+            columns: ["prescription_id"]
+            isOneToOne: false
+            referencedRelation: "prescriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       prescription_drugs: {
         Row: {
           created_at: string

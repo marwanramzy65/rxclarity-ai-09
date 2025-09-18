@@ -5,9 +5,12 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { CheckCircle, AlertTriangle, XCircle, RotateCcw, Shield, CreditCard, FileText, Eye } from "lucide-react";
+import { GrievanceForm } from "@/components/GrievanceForm";
+import { GrievanceStatus } from "@/components/GrievanceStatus";
 
 interface PrescriptionResultsProps {
   results: {
+    prescriptionId?: string;
     insuranceDecision: {
       finalDecision: string;
       message: string;
@@ -198,8 +201,30 @@ const PrescriptionResults = ({ results, onReset, onSaveToHistory }: Prescription
               </DialogContent>
             </Dialog>
           </div>
+          
+          {/* Show grievance form for denied prescriptions */}
+          {insuranceDecision.finalDecision.toLowerCase() === 'denied' && results.prescriptionId && (
+            <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-orange-800 mb-1">
+                    Prescription Denied?
+                  </p>
+                  <p className="text-xs text-orange-600">
+                    You can submit an appeal if you believe this decision is incorrect.
+                  </p>
+                </div>
+                <GrievanceForm prescriptionId={results.prescriptionId} />
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
+      
+      {/* Show grievance status if exists */}
+      {results.prescriptionId && (
+        <GrievanceStatus prescriptionId={results.prescriptionId} />
+      )}
 
       {/* Drug Interactions */}
       <Card className="bg-gradient-card border-0 shadow-elevated">
