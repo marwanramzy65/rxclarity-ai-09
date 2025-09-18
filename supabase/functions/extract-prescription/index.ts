@@ -54,15 +54,15 @@ serve(async (req) => {
 
     console.log('Sending image to Azure AI for processing...');
     
-    // Call Azure AI service
-    const response = await fetch('https://pharmaverse.services.ai.azure.com/api/models/v1/chat/completions', {
+    // Call Azure AI service with deployment name
+    const deploymentName = 'Llama-4-Maverick-17B-128E-Instruct-FP8'; // This should be your deployment name
+    const response = await fetch(`https://pharmaverse.services.ai.azure.com/openai/deployments/${deploymentName}/chat/completions?api-version=2024-02-15-preview`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${azureApiKey}`,
+        'api-key': azureApiKey,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: "Llama-4-Maverick-17B-128E-Instruct-FP8",
         messages: [
           {
             role: 'system',
