@@ -129,6 +129,78 @@ export type Database = {
           },
         ]
       }
+      kidney_claims: {
+        Row: {
+          created_at: string
+          current_stage: number
+          final_diagnosis: string | null
+          id: string
+          patient_id: string
+          patient_name: string
+          stage_1_completed: boolean | null
+          stage_1_completed_at: string | null
+          stage_1_file_url: string | null
+          stage_2_completed: boolean | null
+          stage_2_completed_at: string | null
+          stage_2_file_url: string | null
+          stage_3_completed: boolean | null
+          stage_3_completed_at: string | null
+          stage_3_file_url: string | null
+          stage_4_completed: boolean | null
+          stage_4_completed_at: string | null
+          stage_4_file_url: string | null
+          status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_stage?: number
+          final_diagnosis?: string | null
+          id?: string
+          patient_id: string
+          patient_name: string
+          stage_1_completed?: boolean | null
+          stage_1_completed_at?: string | null
+          stage_1_file_url?: string | null
+          stage_2_completed?: boolean | null
+          stage_2_completed_at?: string | null
+          stage_2_file_url?: string | null
+          stage_3_completed?: boolean | null
+          stage_3_completed_at?: string | null
+          stage_3_file_url?: string | null
+          stage_4_completed?: boolean | null
+          stage_4_completed_at?: string | null
+          stage_4_file_url?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_stage?: number
+          final_diagnosis?: string | null
+          id?: string
+          patient_id?: string
+          patient_name?: string
+          stage_1_completed?: boolean | null
+          stage_1_completed_at?: string | null
+          stage_1_file_url?: string | null
+          stage_2_completed?: boolean | null
+          stage_2_completed_at?: string | null
+          stage_2_file_url?: string | null
+          stage_3_completed?: boolean | null
+          stage_3_completed_at?: string | null
+          stage_3_file_url?: string | null
+          stage_4_completed?: boolean | null
+          stage_4_completed_at?: string | null
+          stage_4_file_url?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       prescription_drugs: {
         Row: {
           created_at: string

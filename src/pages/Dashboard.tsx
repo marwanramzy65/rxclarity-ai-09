@@ -2,9 +2,10 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Pill, User, LogOut, Plus, History, AlertTriangle, BarChart3 } from "lucide-react";
+import { Pill, User, LogOut, Plus, History, AlertTriangle, BarChart3, Activity } from "lucide-react";
 import PrescriptionForm from "@/components/PrescriptionForm";
 import PrescriptionHistory from "@/components/PrescriptionHistory";
+import KidneyClaimProcess from "@/components/KidneyClaimProcess";
 import DetailedStatsModal from "@/components/DetailedStatsModal";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useAuth } from "@/contexts/AuthContext";
@@ -133,7 +134,7 @@ const Dashboard = () => {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
-          <TabsList className="grid w-full grid-cols-2 h-12">
+          <TabsList className="grid w-full grid-cols-3 h-12">
             <TabsTrigger value="new-prescription" className="flex items-center justify-center space-x-1 sm:space-x-2 text-sm">
               <Plus className="h-4 w-4" />
               <span className="">New Prescription</span>
@@ -141,6 +142,10 @@ const Dashboard = () => {
             <TabsTrigger value="history" className="flex items-center justify-center space-x-1 sm:space-x-2 text-sm">
               <History className="h-4 w-4" />
               <span>History</span>
+            </TabsTrigger>
+            <TabsTrigger value="kidney-claims" className="flex items-center justify-center space-x-1 sm:space-x-2 text-sm">
+              <Activity className="h-4 w-4" />
+              <span>Kidney Claims</span>
             </TabsTrigger>
           </TabsList>
 
@@ -168,6 +173,20 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent className="px-3 sm:px-6 pb-4 sm:pb-6">
                 <PrescriptionHistory />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="kidney-claims">
+            <Card className="shadow-elevated border-0">
+              <CardHeader className="px-3 sm:px-6 py-4 sm:py-6">
+                <CardTitle className="text-lg sm:text-xl">Kidney Diagnosis Claims</CardTitle>
+                <CardDescription className="text-sm">
+                  Manage kidney diagnosis claims through the 4-stage workflow process
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-3 sm:px-6 pb-4 sm:pb-6">
+                <KidneyClaimProcess />
               </CardContent>
             </Card>
           </TabsContent>
