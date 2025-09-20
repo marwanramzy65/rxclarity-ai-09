@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Upload, Check, Clock, FileText, Activity, Stethoscope, ClipboardCheck } from "lucide-react";
-import { useKidneyClaims, KidneyClaim } from "@/hooks/useKidneyClaims";
+import { useDiagnosisClaims, DiagnosisClaim } from "@/hooks/useDiagnosisClaims";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -36,8 +36,8 @@ const STAGES = [
   }
 ];
 
-export default function KidneyClaimProcess() {
-  const { claims, loading, createClaim, updateStage } = useKidneyClaims();
+export default function DiagnosisClaimProcess() {
+  const { claims, loading, createClaim, updateStage } = useDiagnosisClaims();
   const [newPatientName, setNewPatientName] = useState("");
   const [newPatientId, setNewPatientId] = useState("");
   const [uploadingStage, setUploadingStage] = useState<{claimId: string, stage: number} | null>(null);
@@ -49,35 +49,46 @@ export default function KidneyClaimProcess() {
       return;
     }
 
-    try {
-      await createClaim(newPatientName.trim(), newPatientId.trim());
-      setNewPatientName("");
-      setNewPatientId("");
-      toast.success("New kidney claim created successfully");
-    } catch (error) {
-      console.error("Error creating claim:", error);
-      toast.error("Failed to create claim");
-    }
+      try {
+        await createClaim(newPatientName.trim(), newPatientId.trim());
+        setNewPatientName("");
+        setNewPatientId("");
+        toast.success("New diagnosis claim created successfully");
+      } catch (error) {
+        console.error("Error creating claim:", error);
+        toast.error("Failed to create claim");
+      }
   };
 
   const handleFileUpload = async (claimId: string, stage: number, file: File) => {
     try {
       setUploadingStage({ claimId, stage });
       
+      console.log('Starting file upload:', { claimId, stage, fileName: file.name, fileSize: file.size });
+      
       // Upload file to Supabase storage
       const fileExt = file.name.split('.').pop();
-      const fileName = `${claimId}_stage_${stage}_${Date.now()}.${fileExt}`;
+      const fileName = `claims/${claimId}_stage_${stage}_${Date.now()}.${fileExt}`;
+      
+      console.log('Uploading to storage with filename:', fileName);
       
       const { data, error: uploadError } = await supabase.storage
         .from('grievance-documents')
         .upload(fileName, file);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Storage upload error:', uploadError);
+        throw uploadError;
+      }
+      
+      console.log('Upload successful:', data);
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('grievance-documents')
         .getPublicUrl(fileName);
+
+      console.log('Got public URL:', publicUrl);
 
       // Update claim stage
       await updateStage(claimId, stage, publicUrl);
@@ -85,14 +96,15 @@ export default function KidneyClaimProcess() {
       toast.success(`Stage ${stage} completed successfully`);
     } catch (error) {
       console.error("Error uploading file:", error);
-      toast.error("Failed to upload file");
+      const errorMessage = error instanceof Error ? error.message : 'Failed to upload file';
+      toast.error(`Upload failed: ${errorMessage}`);
     } finally {
       setUploadingStage(null);
     }
   };
 
-  const getStageStatus = (claim: KidneyClaim, stageId: number) => {
-    const completed = claim[`stage_${stageId}_completed` as keyof KidneyClaim] as boolean;
+  const getStageStatus = (claim: DiagnosisClaim, stageId: number) => {
+    const completed = claim[`stage_${stageId}_completed` as keyof DiagnosisClaim] as boolean;
     const isCurrent = claim.current_stage === stageId;
     
     if (completed) return 'completed';
@@ -100,7 +112,7 @@ export default function KidneyClaimProcess() {
     return 'pending';
   };
 
-  const getProgressPercentage = (claim: KidneyClaim) => {
+  const getProgressPercentage = (claim: DiagnosisClaim) => {
     const completedStages = [
       claim.stage_1_completed,
       claim.stage_2_completed,
@@ -128,10 +140,10 @@ export default function KidneyClaimProcess() {
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <Activity className="h-5 w-5 text-primary" />
-            <span>New Kidney Diagnosis Claim</span>
+            <span>New Medical Diagnosis Claim</span>
           </CardTitle>
           <CardDescription>
-            Start a new kidney claim processing workflow
+            Start a new medical diagnosis claim processing workflow
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -285,9 +297,9 @@ export default function KidneyClaimProcess() {
         <Card className="shadow-elevated border-0">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Activity className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No Kidney Claims Yet</h3>
+            <h3 className="text-lg font-semibold mb-2">No Diagnosis Claims Yet</h3>
             <p className="text-muted-foreground text-center">
-              Create your first kidney diagnosis claim to start the processing workflow.
+              Create your first medical diagnosis claim to start the processing workflow.
             </p>
           </CardContent>
         </Card>

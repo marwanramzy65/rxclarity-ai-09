@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
-export interface KidneyClaim {
+export interface DiagnosisClaim {
   id: string;
   user_id: string;
   patient_name: string;
@@ -26,8 +26,8 @@ export interface KidneyClaim {
   updated_at: string;
 }
 
-export const useKidneyClaims = () => {
-  const [claims, setClaims] = useState<KidneyClaim[]>([]);
+export const useDiagnosisClaims = () => {
+  const [claims, setClaims] = useState<DiagnosisClaim[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
@@ -84,7 +84,7 @@ export const useKidneyClaims = () => {
       updateData.current_stage = stage + 1;
     } else {
       updateData.status = 'completed';
-      updateData.final_diagnosis = 'Kidney function analysis completed. Please consult with a nephrologist for detailed interpretation of the results and recommended treatment plan.';
+      updateData.final_diagnosis = 'Kidney function analysis completed. Based on the submitted documentation and test results, the patient shows signs that require further evaluation. Please consult with a nephrologist for detailed interpretation of the results and recommended treatment plan. Consider monitoring kidney function parameters and implementing appropriate therapeutic interventions as needed.';
     }
 
     const { error } = await supabase

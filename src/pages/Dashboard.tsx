@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Pill, User, LogOut, Plus, History, AlertTriangle, BarChart3, Activity } from "lucide-react";
 import PrescriptionForm from "@/components/PrescriptionForm";
 import PrescriptionHistory from "@/components/PrescriptionHistory";
-import KidneyClaimProcess from "@/components/KidneyClaimProcess";
+import DiagnosisClaimProcess from "@/components/DiagnosisClaimProcess";
 import DetailedStatsModal from "@/components/DetailedStatsModal";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useAuth } from "@/contexts/AuthContext";
@@ -143,9 +143,9 @@ const Dashboard = () => {
               <History className="h-4 w-4" />
               <span>History</span>
             </TabsTrigger>
-            <TabsTrigger value="kidney-claims" className="flex items-center justify-center space-x-1 sm:space-x-2 text-sm">
+            <TabsTrigger value="diagnosis-claims" className="flex items-center justify-center space-x-1 sm:space-x-2 text-sm">
               <Activity className="h-4 w-4" />
-              <span>Kidney Claims</span>
+              <span>Diagnosis Claims</span>
             </TabsTrigger>
           </TabsList>
 
@@ -177,16 +177,16 @@ const Dashboard = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="kidney-claims">
+          <TabsContent value="diagnosis-claims">
             <Card className="shadow-elevated border-0">
               <CardHeader className="px-3 sm:px-6 py-4 sm:py-6">
-                <CardTitle className="text-lg sm:text-xl">Kidney Diagnosis Claims</CardTitle>
+                <CardTitle className="text-lg sm:text-xl">Medical Diagnosis Claims</CardTitle>
                 <CardDescription className="text-sm">
-                  Manage kidney diagnosis claims through the 4-stage workflow process
+                  Manage medical diagnosis claims through the 4-stage workflow process
                 </CardDescription>
               </CardHeader>
               <CardContent className="px-3 sm:px-6 pb-4 sm:pb-6">
-                <KidneyClaimProcess />
+                <DiagnosisClaimProcess />
               </CardContent>
             </Card>
           </TabsContent>
