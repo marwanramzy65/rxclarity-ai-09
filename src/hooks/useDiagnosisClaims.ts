@@ -82,7 +82,13 @@ export const useDiagnosisClaims = () => {
     // Auto-advance to next stage if not at stage 4
     if (stage < 4) {
       updateData.current_stage = stage + 1;
-    } else {
+    }
+    
+    // If completing stage 3, automatically complete stage 4 with final diagnosis
+    if (stage === 3) {
+      updateData.current_stage = 4;
+      updateData.stage_4_completed = true;
+      updateData.stage_4_completed_at = new Date().toISOString();
       updateData.status = 'completed';
       updateData.final_diagnosis = 'Kidney function analysis completed. Based on the submitted documentation and test results, the patient shows signs that require further evaluation. Please consult with a nephrologist for detailed interpretation of the results and recommended treatment plan. Consider monitoring kidney function parameters and implementing appropriate therapeutic interventions as needed.';
     }

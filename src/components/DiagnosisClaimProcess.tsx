@@ -233,7 +233,7 @@ export default function DiagnosisClaimProcess() {
                       <h4 className="font-semibold text-sm mb-1">{stage.title}</h4>
                       <p className="text-xs text-muted-foreground mb-3">{stage.description}</p>
                       
-                      {status === 'current' && !isUploading && (
+                      {status === 'current' && !isUploading && stage.id !== 4 && (
                         <div>
                           <input
                             type="file"
@@ -256,6 +256,12 @@ export default function DiagnosisClaimProcess() {
                             <Upload className="h-3 w-3 mr-1" />
                             Upload
                           </Button>
+                        </div>
+                      )}
+                      
+                      {status === 'current' && stage.id === 4 && (
+                        <div className="text-xs text-primary">
+                          Ready for diagnosis
                         </div>
                       )}
                       
