@@ -245,6 +245,7 @@ export type Database = {
           created_at: string
           id: string
           insurance_decision: string | null
+          insurance_id: string | null
           insurance_message: string | null
           insurance_tier: string
           patient_id: string
@@ -257,6 +258,7 @@ export type Database = {
           created_at?: string
           id?: string
           insurance_decision?: string | null
+          insurance_id?: string | null
           insurance_message?: string | null
           insurance_tier?: string
           patient_id: string
@@ -269,6 +271,7 @@ export type Database = {
           created_at?: string
           id?: string
           insurance_decision?: string | null
+          insurance_id?: string | null
           insurance_message?: string | null
           insurance_tier?: string
           patient_id?: string

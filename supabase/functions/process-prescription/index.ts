@@ -14,7 +14,7 @@ serve(async (req) => {
   }
 
   try {
-    const { patientName, patientId, insuranceTier, selectedDrugs } = await req.json();
+    const { patientName, patientId, insuranceId, insuranceTier, selectedDrugs } = await req.json();
     
     // Get Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -35,7 +35,7 @@ serve(async (req) => {
     }
 
     console.log('Processing prescription for user:', user.id);
-    console.log('Prescription details:', { patientName, patientId, insuranceTier, selectedDrugs });
+    console.log('Prescription details:', { patientName, patientId, insuranceId, insuranceTier, selectedDrugs });
 
     const startTime = Date.now();
 
@@ -46,6 +46,7 @@ serve(async (req) => {
         user_id: user.id,
         patient_name: patientName,
         patient_id: patientId,
+        insurance_id: insuranceId,
         insurance_tier: insuranceTier,
       })
       .select()

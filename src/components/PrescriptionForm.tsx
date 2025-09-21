@@ -48,6 +48,7 @@ type FormMode = 'selection' | 'photo-upload' | 'medication-review' | 'manual-ent
 const PrescriptionForm = () => {
   const [patientName, setPatientName] = useState("");
   const [patientId, setPatientId] = useState("");
+  const [insuranceId, setInsuranceId] = useState("");
   const [insuranceTier, setInsuranceTier] = useState("Standard");
   const [selectedDrugs, setSelectedDrugs] = useState<SelectedDrug[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -80,7 +81,7 @@ const PrescriptionForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!patientName || !patientId || selectedDrugs.length === 0) {
+    if (!patientName || !patientId || !insuranceId || selectedDrugs.length === 0) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields and add at least one medication.",
@@ -97,6 +98,7 @@ const PrescriptionForm = () => {
         body: {
           patientName,
           patientId,
+          insuranceId,
           insuranceTier,
           selectedDrugs,
         }
@@ -160,6 +162,7 @@ const PrescriptionForm = () => {
   const resetForm = () => {
     setPatientName("");
     setPatientId("");
+    setInsuranceId("");
     setSelectedDrugs([]);
     setResults(null);
     setFormMode('selection');
@@ -281,6 +284,17 @@ const PrescriptionForm = () => {
                   required
                 />
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="insuranceId" className="text-sm">Insurance ID *</Label>
+              <Input
+                id="insuranceId"
+                value={insuranceId}
+                onChange={(e) => setInsuranceId(e.target.value)}
+                placeholder="Enter insurance ID"
+                className="border-input focus:ring-primary h-10"
+                required
+              />
             </div>
           </CardContent>
         </Card>
