@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Upload, Check, Clock, FileText, Activity, Stethoscope, ClipboardCheck } from "lucide-react";
 import { useDiagnosisClaims, DiagnosisClaim } from "@/hooks/useDiagnosisClaims";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -38,6 +39,7 @@ const STAGES = [
 
 export default function DiagnosisClaimProcess() {
   const { claims, loading, createClaim, updateStage } = useDiagnosisClaims();
+  const { user } = useAuth();
   const [newPatientName, setNewPatientName] = useState("");
   const [newPatientId, setNewPatientId] = useState("");
   const [uploadingStage, setUploadingStage] = useState<{claimId: string, stage: number} | null>(null);
@@ -66,9 +68,9 @@ export default function DiagnosisClaimProcess() {
       
       console.log('Starting file upload:', { claimId, stage, fileName: file.name, fileSize: file.size });
       
-      // Upload file to Supabase storage
+      // Upload file to Supabase storage with user ID folder structure
       const fileExt = file.name.split('.').pop();
-      const fileName = `claims/${claimId}_stage_${stage}_${Date.now()}.${fileExt}`;
+      const fileName = `${user?.id}/claims/${claimId}_stage_${stage}_${Date.now()}.${fileExt}`;
       
       console.log('Uploading to storage with filename:', fileName);
       
