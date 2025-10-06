@@ -53,11 +53,98 @@ function levenshteinDistance(str1: string, str2: string): number {
   return dp[m][n];
 }
 
-// Calculate similarity score (0-1, higher is more similar)
+// Jaro-Winkler distance for better prefix matching
+function jaroWinkler(s1: string, s2: string): number {
+  const m1 = s1.length;
+  const m2 = s2.length;
+  
+  if (m1 === 0 && m2 === 0) return 1.0;
+  if (m1 === 0 || m2 === 0) return 0.0;
+  
+  const matchWindow = Math.floor(Math.max(m1, m2) / 2) - 1;
+  const s1Matches = new Array(m1).fill(false);
+  const s2Matches = new Array(m2).fill(false);
+  
+  let matches = 0;
+  let transpositions = 0;
+  
+  // Find matches
+  for (let i = 0; i < m1; i++) {
+    const start = Math.max(0, i - matchWindow);
+    const end = Math.min(i + matchWindow + 1, m2);
+    
+    for (let j = start; j < end; j++) {
+      if (s2Matches[j] || s1[i] !== s2[j]) continue;
+      s1Matches[i] = true;
+      s2Matches[j] = true;
+      matches++;
+      break;
+    }
+  }
+  
+  if (matches === 0) return 0.0;
+  
+  // Find transpositions
+  let k = 0;
+  for (let i = 0; i < m1; i++) {
+    if (!s1Matches[i]) continue;
+    while (!s2Matches[k]) k++;
+    if (s1[i] !== s2[k]) transpositions++;
+    k++;
+  }
+  
+  const jaro = (matches / m1 + matches / m2 + (matches - transpositions / 2) / matches) / 3;
+  
+  // Calculate common prefix for Winkler modification
+  let prefix = 0;
+  for (let i = 0; i < Math.min(m1, m2, 4); i++) {
+    if (s1[i] === s2[i]) prefix++;
+    else break;
+  }
+  
+  return jaro + prefix * 0.1 * (1 - jaro);
+}
+
+// N-gram similarity for partial matching
+function ngramSimilarity(s1: string, s2: string, n: number = 2): number {
+  const getNgrams = (str: string): Set<string> => {
+    const ngrams = new Set<string>();
+    for (let i = 0; i <= str.length - n; i++) {
+      ngrams.add(str.slice(i, i + n));
+    }
+    return ngrams;
+  };
+  
+  const ngrams1 = getNgrams(s1);
+  const ngrams2 = getNgrams(s2);
+  
+  let intersection = 0;
+  ngrams1.forEach(gram => {
+    if (ngrams2.has(gram)) intersection++;
+  });
+  
+  const union = ngrams1.size + ngrams2.size - intersection;
+  return union === 0 ? 0 : intersection / union;
+}
+
+// Combined similarity score using multiple algorithms
 function calculateSimilarity(str1: string, str2: string): number {
-  const distance = levenshteinDistance(str1.toLowerCase(), str2.toLowerCase());
-  const maxLength = Math.max(str1.length, str2.length);
-  return maxLength === 0 ? 1 : 1 - (distance / maxLength);
+  const s1 = str1.toLowerCase();
+  const s2 = str2.toLowerCase();
+  
+  // Levenshtein-based similarity
+  const distance = levenshteinDistance(s1, s2);
+  const maxLength = Math.max(s1.length, s2.length);
+  const levenshteinSim = maxLength === 0 ? 1 : 1 - (distance / maxLength);
+  
+  // Jaro-Winkler similarity (better for typos and transpositions)
+  const jaroWinklerSim = jaroWinkler(s1, s2);
+  
+  // N-gram similarity (better for missing/extra characters)
+  const ngramSim = ngramSimilarity(s1, s2, 2);
+  
+  // Weighted average (emphasize Jaro-Winkler for pharmaceutical names)
+  return (jaroWinklerSim * 0.5) + (levenshteinSim * 0.3) + (ngramSim * 0.2);
 }
 
 serve(async (req) => {
@@ -231,9 +318,9 @@ serve(async (req) => {
               similarity: calculateSimilarity(med.name, drug.name)
             }));
 
-            // Filter drugs with similarity above threshold (70%)
+            // Filter drugs with similarity above threshold (55% - lower for better recall)
             const similarDrugs = drugsWithSimilarity
-              .filter(drug => drug.similarity >= 0.70)
+              .filter(drug => drug.similarity >= 0.55)
               .sort((a, b) => b.similarity - a.similarity)
               .slice(0, 5);
 
