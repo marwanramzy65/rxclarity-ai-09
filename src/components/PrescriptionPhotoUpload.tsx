@@ -16,6 +16,13 @@ interface ExtractedMedication {
     strength: string;
     generic_name: string;
   };
+  similarMatches?: Array<{
+    id: string;
+    name: string;
+    strength: string;
+    generic_name: string;
+    similarity: number;
+  }>;
 }
 
 interface PrescriptionPhotoUploadProps {

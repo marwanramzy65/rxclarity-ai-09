@@ -19,6 +19,13 @@ interface ExtractedMedication {
     strength: string;
     generic_name: string;
   };
+  similarMatches?: Array<{
+    id: string;
+    name: string;
+    strength: string;
+    generic_name: string;
+    similarity: number;
+  }>;
 }
 
 interface ReviewedMedication extends ExtractedMedication {
@@ -28,6 +35,12 @@ interface ReviewedMedication extends ExtractedMedication {
   editedName?: string;
   editedStrength?: string;
   editedDirections?: string;
+  selectedSimilar?: {
+    id: string;
+    name: string;
+    strength: string;
+    generic_name: string;
+  };
 }
 
 interface MedicationReviewProps {
@@ -184,7 +197,54 @@ const MedicationReview = ({ medications, onConfirm, onBack }: MedicationReviewPr
                   />
                 </div>
 
-                {!med.found && (
+                {!med.found && med.similarMatches && med.similarMatches.length > 0 && (
+                  <div className="space-y-3 p-3 bg-primary/5 border border-primary/20 rounded-md">
+                    <div className="flex items-start space-x-2">
+                      <AlertCircle className="h-4 w-4 text-primary mt-0.5" />
+                      <div className="text-sm flex-1">
+                        <p className="font-medium text-primary">Similar medications found</p>
+                        <p className="text-muted-foreground">
+                          The medication name may have been written differently. Select a match below:
+                        </p>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      {med.similarMatches.map((similar) => (
+                        <button
+                          key={similar.id}
+                          onClick={() => {
+                            updateMedication(med.id, {
+                              selectedSimilar: similar,
+                              editedName: similar.name,
+                              editedStrength: similar.strength,
+                              found: true,
+                              dbMatch: similar
+                            });
+                          }}
+                          className={`w-full text-left p-3 rounded-md border transition-colors ${
+                            med.selectedSimilar?.id === similar.id
+                              ? 'border-primary bg-primary/10'
+                              : 'border-border hover:border-primary/50 hover:bg-accent'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="font-medium">{similar.name} ({similar.strength})</div>
+                              {similar.generic_name && similar.generic_name !== similar.name && (
+                                <div className="text-sm text-muted-foreground">Generic: {similar.generic_name}</div>
+                              )}
+                            </div>
+                            <Badge variant="outline" className="text-xs">
+                              {Math.round(similar.similarity * 100)}% match
+                            </Badge>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {!med.found && (!med.similarMatches || med.similarMatches.length === 0) && (
                   <div className="flex items-start space-x-2 p-3 bg-warning/10 rounded-md">
                     <AlertCircle className="h-4 w-4 text-warning mt-0.5" />
                     <div className="text-sm">

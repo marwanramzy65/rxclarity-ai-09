@@ -18,6 +18,46 @@ interface ExtractedMedication {
     strength: string;
     generic_name: string;
   };
+  similarMatches?: Array<{
+    id: string;
+    name: string;
+    strength: string;
+    generic_name: string;
+    similarity: number;
+  }>;
+}
+
+// Levenshtein distance algorithm for fuzzy string matching
+function levenshteinDistance(str1: string, str2: string): number {
+  const m = str1.length;
+  const n = str2.length;
+  const dp: number[][] = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0));
+
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (str1[i - 1] === str2[j - 1]) {
+        dp[i][j] = dp[i - 1][j - 1];
+      } else {
+        dp[i][j] = Math.min(
+          dp[i - 1][j] + 1,    // deletion
+          dp[i][j - 1] + 1,    // insertion
+          dp[i - 1][j - 1] + 1 // substitution
+        );
+      }
+    }
+  }
+
+  return dp[m][n];
+}
+
+// Calculate similarity score (0-1, higher is more similar)
+function calculateSimilarity(str1: string, str2: string): number {
+  const distance = levenshteinDistance(str1.toLowerCase(), str2.toLowerCase());
+  const maxLength = Math.max(str1.length, str2.length);
+  return maxLength === 0 ? 1 : 1 - (distance / maxLength);
 }
 
 serve(async (req) => {
@@ -142,13 +182,15 @@ serve(async (req) => {
       // Try to find matching drug in database
       let dbMatch = null;
       let found = false;
+      let similarMatches: Array<any> = [];
       
       try {
+        // First, try to find close matches using ilike
         const { data: matchedDrugs, error } = await supabase
           .from('drugs')
           .select('*')
           .ilike('name', `%${med.name}%`)
-          .limit(5);
+          .limit(10);
 
         if (!error && matchedDrugs && matchedDrugs.length > 0) {
           // Look for exact or close matches
@@ -171,6 +213,40 @@ serve(async (req) => {
             }
           }
         }
+
+        // If no exact match found, use fuzzy matching
+        if (!found) {
+          console.log(`No exact match found for ${med.name}, trying fuzzy matching...`);
+          
+          // Get all drugs for fuzzy matching
+          const { data: allDrugs, error: allError } = await supabase
+            .from('drugs')
+            .select('*')
+            .limit(1000);
+
+          if (!allError && allDrugs) {
+            // Calculate similarity for each drug
+            const drugsWithSimilarity = allDrugs.map(drug => ({
+              ...drug,
+              similarity: calculateSimilarity(med.name, drug.name)
+            }));
+
+            // Filter drugs with similarity above threshold (70%)
+            const similarDrugs = drugsWithSimilarity
+              .filter(drug => drug.similarity >= 0.70)
+              .sort((a, b) => b.similarity - a.similarity)
+              .slice(0, 5);
+
+            if (similarDrugs.length > 0) {
+              similarMatches = similarDrugs;
+              console.log(`Found ${similarDrugs.length} similar matches for ${med.name}`);
+              
+              // Use the best match as suggestion
+              dbMatch = similarDrugs[0];
+              found = false; // Keep found as false to indicate it's a fuzzy match
+            }
+          }
+        }
       } catch (dbError) {
         console.error('Database search error:', dbError);
         // Continue without database match
@@ -181,7 +257,8 @@ serve(async (req) => {
         strength: med.strength,
         directions: med.directions || '',
         found,
-        dbMatch
+        dbMatch,
+        similarMatches: similarMatches.length > 0 ? similarMatches : undefined
       });
     }
 
