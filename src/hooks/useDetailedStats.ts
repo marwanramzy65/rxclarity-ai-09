@@ -105,6 +105,16 @@ export const useDetailedStats = () => {
         throw prescriptionsError;
       }
 
+      // Fetch grievances data
+      const { data: grievances, error: grievancesError } = await supabase
+        .from('grievances')
+        .select('*')
+        .eq('user_id', user?.id);
+
+      if (grievancesError) {
+        console.error('Error fetching grievances:', grievancesError);
+      }
+
       // Calculate weekly trends (last 4 weeks)
       const weeklyTrends = calculateWeeklyTrends(prescriptions || []);
       
@@ -124,7 +134,7 @@ export const useDetailedStats = () => {
       const performanceMetrics = calculatePerformanceMetrics(prescriptions || []);
       
       // Calculate grievance stats
-      const grievanceStats = calculateGrievanceStats(prescriptions || []);
+      const grievanceStats = calculateGrievanceStats(grievances || []);
 
       setStats({
         weeklyTrends,
@@ -332,18 +342,11 @@ function calculatePerformanceMetrics(prescriptions: any[]) {
   };
 }
 
-function calculateGrievanceStats(prescriptions: any[]) {
-  // Count prescriptions that were denied (potential grievances)
-  const deniedPrescriptions = prescriptions.filter(p => 
-    p.insurance_decision === 'denied'
-  );
-  
-  // For demo purposes, simulate grievance distribution
-  // In a real app, you'd query the grievances table
-  const total = deniedPrescriptions.length;
-  const pending = Math.floor(total * 0.6); // 60% pending
-  const approved = Math.floor(total * 0.25); // 25% approved
-  const rejected = total - pending - approved; // remainder rejected
+function calculateGrievanceStats(grievances: any[]) {
+  const total = grievances.length;
+  const pending = grievances.filter(g => g.status === 'pending').length;
+  const approved = grievances.filter(g => g.status === 'approved').length;
+  const rejected = grievances.filter(g => g.status === 'rejected').length;
   
   return {
     total,
