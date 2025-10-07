@@ -201,6 +201,90 @@ export type Database = {
         }
         Relationships: []
       }
+      lab_tests: {
+        Row: {
+          created_at: string
+          file_url: string | null
+          id: string
+          notes: string | null
+          patient_id: string
+          patient_name: string
+          result: string | null
+          test_date: string
+          test_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          notes?: string | null
+          patient_id: string
+          patient_name: string
+          result?: string | null
+          test_date: string
+          test_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          notes?: string | null
+          patient_id?: string
+          patient_name?: string
+          result?: string | null
+          test_date?: string
+          test_name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      medical_scans: {
+        Row: {
+          created_at: string
+          file_url: string | null
+          findings: string | null
+          id: string
+          notes: string | null
+          patient_id: string
+          patient_name: string
+          scan_date: string
+          scan_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_url?: string | null
+          findings?: string | null
+          id?: string
+          notes?: string | null
+          patient_id: string
+          patient_name: string
+          scan_date: string
+          scan_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          file_url?: string | null
+          findings?: string | null
+          id?: string
+          notes?: string | null
+          patient_id?: string
+          patient_name?: string
+          scan_date?: string
+          scan_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       prescription_drugs: {
         Row: {
           created_at: string

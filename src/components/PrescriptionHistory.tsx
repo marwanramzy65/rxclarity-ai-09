@@ -4,13 +4,15 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Eye, Calendar, User, Pill, AlertTriangle, CheckCircle, Clock, CreditCard, Shield, FileText, XCircle } from "lucide-react";
+import { Eye, Calendar, User, Pill, AlertTriangle, CheckCircle, Clock, CreditCard, Shield, FileText, XCircle, History } from "lucide-react";
 import { usePrescriptions } from "@/hooks/usePrescriptions";
 import { GrievanceForm } from "@/components/GrievanceForm";
 import { GrievanceStatus } from "@/components/GrievanceStatus";
+import { useNavigate } from "react-router-dom";
 
 const PrescriptionHistory = () => {
   const { prescriptions, loading, error } = usePrescriptions();
+  const navigate = useNavigate();
   const [selectedPrescription, setSelectedPrescription] = useState<any>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
 
@@ -136,6 +138,15 @@ const PrescriptionHistory = () => {
                         <h3 className="font-semibold">{prescription.patient_name}</h3>
                         <p className="text-sm text-muted-foreground">ID: {prescription.patient_id}</p>
                       </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigate(`/patient/${prescription.patient_id}`)}
+                        className="ml-2"
+                      >
+                        <History className="h-4 w-4 mr-1" />
+                        View History
+                      </Button>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Badge variant="outline">{prescription.insurance_tier}</Badge>
