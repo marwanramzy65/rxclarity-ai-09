@@ -45,19 +45,15 @@ export const AddMedicalScanForm = ({ patientId, patientName, onSuccess }: AddMed
       // Upload file if provided
       if (file) {
         const fileExt = file.name.split('.').pop();
-        const fileName = `${user.id}/${patientId}/${Date.now()}.${fileExt}`;
+        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
         
         const { error: uploadError } = await supabase.storage
-          .from('grievance-documents')
+          .from('medical-scans')
           .upload(fileName, file);
 
         if (uploadError) throw uploadError;
 
-        const { data: { publicUrl } } = supabase.storage
-          .from('grievance-documents')
-          .getPublicUrl(fileName);
-
-        fileUrl = publicUrl;
+        fileUrl = fileName;
       }
 
       // Insert medical scan

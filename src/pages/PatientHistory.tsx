@@ -7,6 +7,7 @@ import { Separator } from '@/components/ui/separator';
 import { usePatientHistory } from '@/hooks/usePatientHistory';
 import { AddLabTestForm } from '@/components/AddLabTestForm';
 import { AddMedicalScanForm } from '@/components/AddMedicalScanForm';
+import { supabase } from '@/integrations/supabase/client';
 import { ArrowLeft, Pill, FileText, Scan, Activity, ExternalLink, Calendar, User, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -179,11 +180,20 @@ export default function PatientHistory() {
                         </p>
                       </div>
                       {test.file_url && (
-                        <Button variant="outline" size="sm" asChild>
-                          <a href={test.file_url} target="_blank" rel="noopener noreferrer">
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            View File
-                          </a>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={async () => {
+                            const { data } = await supabase.storage
+                              .from('lab-tests')
+                              .createSignedUrl(test.file_url, 3600);
+                            if (data?.signedUrl) {
+                              window.open(data.signedUrl, '_blank');
+                            }
+                          }}
+                        >
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          View File
                         </Button>
                       )}
                     </div>
@@ -228,11 +238,20 @@ export default function PatientHistory() {
                         </p>
                       </div>
                       {scan.file_url && (
-                        <Button variant="outline" size="sm" asChild>
-                          <a href={scan.file_url} target="_blank" rel="noopener noreferrer">
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            View File
-                          </a>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={async () => {
+                            const { data } = await supabase.storage
+                              .from('medical-scans')
+                              .createSignedUrl(scan.file_url, 3600);
+                            if (data?.signedUrl) {
+                              window.open(data.signedUrl, '_blank');
+                            }
+                          }}
+                        >
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          View File
                         </Button>
                       )}
                     </div>
