@@ -90,7 +90,7 @@ export default function PatientHistory() {
             <CardContent className="pt-6">
               <div className="flex items-center gap-2 mb-2">
                 <Activity className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold">Kidney Claims</h3>
+                <h3 className="font-semibold">Diagnosis Claims</h3>
               </div>
               <p className="text-3xl font-bold">{patientData.kidneyDiagnosis.length}</p>
             </CardContent>
@@ -103,7 +103,7 @@ export default function PatientHistory() {
             <TabsTrigger value="prescriptions">Prescriptions</TabsTrigger>
             <TabsTrigger value="lab-tests">Lab Tests</TabsTrigger>
             <TabsTrigger value="scans">Medical Scans</TabsTrigger>
-            <TabsTrigger value="kidney">Kidney Claims</TabsTrigger>
+            <TabsTrigger value="kidney">Diagnosis Claims</TabsTrigger>
             <TabsTrigger value="add">Add Records</TabsTrigger>
           </TabsList>
 
@@ -256,12 +256,12 @@ export default function PatientHistory() {
             )}
           </TabsContent>
 
-          {/* Kidney Claims Tab */}
+          {/* Diagnosis Claims Tab */}
           <TabsContent value="kidney" className="space-y-4">
             {patientData.kidneyDiagnosis.length === 0 ? (
               <Card>
                 <CardContent className="pt-6 text-center text-muted-foreground">
-                  No kidney diagnosis claims found
+                  No diagnosis claims found
                 </CardContent>
               </Card>
             ) : (
@@ -270,7 +270,7 @@ export default function PatientHistory() {
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <div>
-                        <CardTitle className="text-lg">Kidney Diagnosis Claim</CardTitle>
+                        <CardTitle className="text-lg">Diagnosis Claim</CardTitle>
                         <p className="text-sm text-muted-foreground">
                           Created: {format(new Date(claim.created_at), 'PPP')}
                         </p>

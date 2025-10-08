@@ -1,8 +1,9 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Pill, User, LogOut, Plus, History, AlertTriangle, BarChart3, Activity } from "lucide-react";
+import { Pill, User, LogOut, Plus, History, AlertTriangle, BarChart3, Activity, Users } from "lucide-react";
 import PrescriptionForm from "@/components/PrescriptionForm";
 import PrescriptionHistory from "@/components/PrescriptionHistory";
 import DiagnosisClaimProcess from "@/components/DiagnosisClaimProcess";
@@ -13,6 +14,7 @@ import { useDashboardStats } from "@/hooks/useDashboardStats";
 
 const Dashboard = () => {
   const { signOut, user } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("new-prescription");
   const [detailedStatsOpen, setDetailedStatsOpen] = useState(false);
   const { stats, loading, error } = useDashboardStats();
@@ -35,6 +37,15 @@ const Dashboard = () => {
             </div>
             
             <div className="flex items-center space-x-2 sm:space-x-4">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => navigate('/patients')}
+                className="hidden sm:flex"
+              >
+                <Users className="h-4 w-4 mr-2" />
+                Patients
+              </Button>
               <div className="hidden sm:flex items-center space-x-2 text-sm text-muted-foreground">
                 <User className="h-4 w-4" />
                 <span className="truncate max-w-32 lg:max-w-none">{user?.email || 'Pharmacist'}</span>

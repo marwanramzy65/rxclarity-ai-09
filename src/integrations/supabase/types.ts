@@ -285,6 +285,45 @@ export type Database = {
         }
         Relationships: []
       }
+      patients: {
+        Row: {
+          address: string | null
+          age: number | null
+          created_at: string
+          email: string | null
+          id: string
+          patient_id: string
+          patient_name: string
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          age?: number | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          patient_id: string
+          patient_name: string
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          age?: number | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          patient_id?: string
+          patient_name?: string
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       prescription_drugs: {
         Row: {
           created_at: string
