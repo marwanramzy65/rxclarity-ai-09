@@ -33,7 +33,7 @@ export default function PatientHistory() {
         <Card className="w-96">
           <CardContent className="pt-6 text-center">
             <p className="text-destructive mb-4">{error || 'Patient not found'}</p>
-            <Button onClick={() => navigate('/dashboard')}>Back to Dashboard</Button>
+            <Button onClick={() => navigate('/patients')}>Back to Patients</Button>
           </CardContent>
         </Card>
       </div>
@@ -44,16 +44,58 @@ export default function PatientHistory() {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto p-6 space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => navigate('/dashboard')}>
+        <div className="flex items-center gap-4 mb-4">
+          <Button variant="ghost" onClick={() => navigate('/patients')}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
+            Back to Patients
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold">{patientData.patient_name}</h1>
-            <p className="text-muted-foreground">Patient ID: {patientData.patient_id}</p>
-          </div>
         </div>
+
+        {/* Patient Profile Card */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-6 w-6 text-primary" />
+              Patient Profile
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Name</p>
+                <p className="font-semibold">{patientData.patient_name}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Patient ID</p>
+                <p className="font-semibold">{patientData.patient_id}</p>
+              </div>
+              {patientData.age && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Age</p>
+                  <p className="font-semibold">{patientData.age} years</p>
+                </div>
+              )}
+              {patientData.phone && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Phone</p>
+                  <p className="font-semibold">{patientData.phone}</p>
+                </div>
+              )}
+              {patientData.email && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Email</p>
+                  <p className="font-semibold">{patientData.email}</p>
+                </div>
+              )}
+              {patientData.address && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Address</p>
+                  <p className="font-semibold">{patientData.address}</p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

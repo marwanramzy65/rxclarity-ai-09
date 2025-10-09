@@ -5,6 +5,10 @@ import { useAuth } from '@/contexts/AuthContext';
 export interface PatientData {
   patient_id: string;
   patient_name: string;
+  age?: number;
+  address?: string;
+  phone?: string;
+  email?: string;
   prescriptions: any[];
   labTests: any[];
   scans: any[];
@@ -26,6 +30,16 @@ export const usePatientHistory = (patientId: string) => {
     try {
       setLoading(true);
       setError(null);
+
+      // Fetch patient profile
+      const { data: patientProfile, error: patientError } = await supabase
+        .from('patients')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('patient_id', patientId)
+        .single();
+
+      if (patientError && patientError.code !== 'PGRST116') throw patientError;
 
       // Fetch prescriptions
       const { data: prescriptions, error: prescError } = await supabase
@@ -73,7 +87,8 @@ export const usePatientHistory = (patientId: string) => {
 
       if (kidneyError) throw kidneyError;
 
-      const patient_name = prescriptions?.[0]?.patient_name || 
+      const patient_name = patientProfile?.patient_name || 
+                          prescriptions?.[0]?.patient_name || 
                           labTests?.[0]?.patient_name || 
                           scans?.[0]?.patient_name || 
                           kidneyDiagnosis?.[0]?.patient_name || 
@@ -82,6 +97,10 @@ export const usePatientHistory = (patientId: string) => {
       setPatientData({
         patient_id: patientId,
         patient_name,
+        age: patientProfile?.age,
+        address: patientProfile?.address,
+        phone: patientProfile?.phone,
+        email: patientProfile?.email,
         prescriptions: prescriptions || [],
         labTests: labTests || [],
         scans: scans || [],
