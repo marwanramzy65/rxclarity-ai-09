@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Search, User, Eye, Plus, Loader2 } from 'lucide-react';
+import { Search, User, Eye, Plus, Loader2, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Patients = () => {
@@ -84,7 +84,16 @@ const Patients = () => {
     <div className="min-h-screen bg-background p-8">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold">Patients</h1>
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => navigate('/dashboard')}
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <h1 className="text-4xl font-bold">Patients</h1>
+          </div>
           <Dialog>
             <DialogTrigger asChild>
               <Button onClick={() => {
