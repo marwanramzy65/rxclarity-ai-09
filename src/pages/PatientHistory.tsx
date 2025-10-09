@@ -33,7 +33,7 @@ export default function PatientHistory() {
         <Card className="w-96">
           <CardContent className="pt-6 text-center">
             <p className="text-destructive mb-4">{error || 'Patient not found'}</p>
-            <Button onClick={() => navigate('/dashboard')}>Back to Dashboard</Button>
+            <Button onClick={() => navigate('/patients')}>Back to Patients</Button>
           </CardContent>
         </Card>
       </div>
@@ -45,9 +45,9 @@ export default function PatientHistory() {
       <div className="container mx-auto p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => navigate('/dashboard')}>
+          <Button variant="ghost" onClick={() => navigate('/patients')}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
+            Back to Patients
           </Button>
           <div>
             <h1 className="text-3xl font-bold">{patientData.patient_name}</h1>
