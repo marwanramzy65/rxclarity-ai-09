@@ -182,6 +182,10 @@ RESPOND IN THIS EXACT JSON FORMAT:
 
     console.log('AI Decision:', aiDecision);
 
+    // Check if there are still denied medications
+    const hasStillDenied = aiDecision.still_denied && aiDecision.still_denied.length > 0;
+    const isFullyApproved = aiDecision.decision === 'APPROVE' && !hasStillDenied;
+
     // Update grievance with AI decision
     const { error: updateError } = await supabaseAdmin
       .from('grievances')
@@ -189,14 +193,18 @@ RESPOND IN THIS EXACT JSON FORMAT:
         ai_decision: aiDecision.decision,
         ai_reasoning: aiDecision.reasoning,
         ai_reviewed_at: new Date().toISOString(),
-        // If AI approves, automatically approve the grievance
-        status: aiDecision.decision === 'APPROVE' ? 'approved' : 'pending',
-        reviewer_notes: aiDecision.decision === 'APPROVE' 
-          ? `✅ AI Auto-Approved: ${aiDecision.reasoning}`
+        approved_medications: aiDecision.covered_medications || [],
+        denied_medications: aiDecision.still_denied || [],
+        // Only auto-approve if ALL medications are covered
+        status: isFullyApproved ? 'approved' : 'pending',
+        reviewer_notes: isFullyApproved
+          ? `✅ AI Auto-Approved: All medications covered. ${aiDecision.reasoning}`
+          : hasStillDenied
+          ? `⚠️ Partial Approval: Some medications still denied. Approved: ${aiDecision.covered_medications?.join(', ') || 'none'}. Still Denied: ${aiDecision.still_denied?.join(', ')}. ${aiDecision.reasoning}`
           : aiDecision.decision === 'DENY'
           ? `❌ AI Denied: ${aiDecision.reasoning}`
           : `⚠️ Flagged for Review: ${aiDecision.reasoning}`,
-        reviewed_at: aiDecision.decision === 'APPROVE' ? new Date().toISOString() : null
+        reviewed_at: isFullyApproved ? new Date().toISOString() : null
       })
       .eq('id', grievanceId);
 

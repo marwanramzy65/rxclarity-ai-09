@@ -114,28 +114,62 @@ export const GrievanceStatus = ({ prescriptionId }: GrievanceStatusProps) => {
 
         {grievance.ai_decision && grievance.ai_reasoning && (
           <div className={`p-3 rounded border ${
-            grievance.ai_decision === 'APPROVE' 
+            grievance.ai_decision === 'APPROVE' && (!grievance.denied_medications || grievance.denied_medications.length === 0)
               ? 'bg-green-50 border-green-200' 
+              : grievance.ai_decision === 'APPROVE' && grievance.denied_medications && grievance.denied_medications.length > 0
+              ? 'bg-orange-50 border-orange-200'
               : grievance.ai_decision === 'DENY'
               ? 'bg-red-50 border-red-200'
               : 'bg-yellow-50 border-yellow-200'
           }`}>
             <h4 className="font-medium mb-2 flex items-center gap-2">
-              {grievance.ai_decision === 'APPROVE' && <CheckCircle className="w-4 h-4 text-green-600" />}
+              {grievance.ai_decision === 'APPROVE' && (!grievance.denied_medications || grievance.denied_medications.length === 0) && (
+                <CheckCircle className="w-4 h-4 text-green-600" />
+              )}
+              {grievance.ai_decision === 'APPROVE' && grievance.denied_medications && grievance.denied_medications.length > 0 && (
+                <Clock className="w-4 h-4 text-orange-600" />
+              )}
               {grievance.ai_decision === 'DENY' && <XCircle className="w-4 h-4 text-red-600" />}
               {grievance.ai_decision === 'FLAG_REVIEW' && <Clock className="w-4 h-4 text-yellow-600" />}
               <span className={
-                grievance.ai_decision === 'APPROVE' 
+                grievance.ai_decision === 'APPROVE' && (!grievance.denied_medications || grievance.denied_medications.length === 0)
                   ? 'text-green-800' 
+                  : grievance.ai_decision === 'APPROVE' && grievance.denied_medications && grievance.denied_medications.length > 0
+                  ? 'text-orange-800'
                   : grievance.ai_decision === 'DENY'
                   ? 'text-red-800'
                   : 'text-yellow-800'
               }>
-                AI Review: {grievance.ai_decision}
+                AI Review: {grievance.ai_decision === 'APPROVE' && grievance.denied_medications && grievance.denied_medications.length > 0 
+                  ? 'PARTIAL APPROVAL' 
+                  : grievance.ai_decision}
               </span>
             </h4>
+
+            {grievance.approved_medications && grievance.approved_medications.length > 0 && (
+              <div className="mb-3 p-2 bg-white/50 rounded">
+                <p className="text-sm font-medium text-green-700 mb-1">✅ Approved Medications:</p>
+                <ul className="text-sm list-disc list-inside text-muted-foreground">
+                  {grievance.approved_medications.map((med, idx) => (
+                    <li key={idx}>{med}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {grievance.denied_medications && grievance.denied_medications.length > 0 && (
+              <div className="mb-3 p-2 bg-white/50 rounded">
+                <p className="text-sm font-medium text-red-700 mb-1">❌ Still Denied Medications:</p>
+                <ul className="text-sm list-disc list-inside text-muted-foreground">
+                  {grievance.denied_medications.map((med, idx) => (
+                    <li key={idx}>{med}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             <p className="text-sm text-muted-foreground mb-2">
-              {grievance.ai_reasoning}
+              <span className="font-medium">Reasoning:</span> {grievance.ai_reasoning}
             </p>
             {grievance.ai_reviewed_at && (
               <p className="text-xs text-muted-foreground">
@@ -179,6 +213,16 @@ export const GrievanceStatus = ({ prescriptionId }: GrievanceStatusProps) => {
               <span className="font-medium text-yellow-800">Manual Review Required</span>
             </div>
             The AI has flagged your appeal for manual review by our medical team. We'll update you once a decision has been made.
+          </div>
+        )}
+
+        {grievance.status === 'pending' && grievance.ai_decision === 'APPROVE' && grievance.denied_medications && grievance.denied_medications.length > 0 && (
+          <div className="text-sm text-muted-foreground bg-orange-50 p-3 rounded border border-orange-200">
+            <div className="flex items-center gap-2 mb-1">
+              <Clock className="w-4 h-4 text-orange-600" />
+              <span className="font-medium text-orange-800">Partial Approval - Manual Review Required</span>
+            </div>
+            Some medications have been approved by AI, but others are still denied. A manual review by our medical team will determine the final decision.
           </div>
         )}
       </CardContent>

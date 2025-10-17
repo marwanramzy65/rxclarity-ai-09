@@ -57,6 +57,7 @@ export type Database = {
       }
       drugs: {
         Row: {
+          category: string | null
           created_at: string
           generic_name: string | null
           id: string
@@ -65,14 +66,16 @@ export type Database = {
           strength: string
         }
         Insert: {
+          category?: string | null
           created_at?: string
           generic_name?: string | null
           id?: string
           manufacturer?: string | null
           name: string
-          strength: string
+          strength?: string
         }
         Update: {
+          category?: string | null
           created_at?: string
           generic_name?: string | null
           id?: string
@@ -87,7 +90,9 @@ export type Database = {
           ai_decision: string | null
           ai_reasoning: string | null
           ai_reviewed_at: string | null
+          approved_medications: string[] | null
           created_at: string
+          denied_medications: string[] | null
           document_url: string | null
           explanation: string
           id: string
@@ -102,7 +107,9 @@ export type Database = {
           ai_decision?: string | null
           ai_reasoning?: string | null
           ai_reviewed_at?: string | null
+          approved_medications?: string[] | null
           created_at?: string
+          denied_medications?: string[] | null
           document_url?: string | null
           explanation: string
           id?: string
@@ -117,7 +124,9 @@ export type Database = {
           ai_decision?: string | null
           ai_reasoning?: string | null
           ai_reviewed_at?: string | null
+          approved_medications?: string[] | null
           created_at?: string
+          denied_medications?: string[] | null
           document_url?: string | null
           explanation?: string
           id?: string

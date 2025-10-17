@@ -14,6 +14,8 @@ export interface Grievance {
   ai_decision: string | null;
   ai_reasoning: string | null;
   ai_reviewed_at: string | null;
+  approved_medications: string[] | null;
+  denied_medications: string[] | null;
   created_at: string;
   updated_at: string;
 }
