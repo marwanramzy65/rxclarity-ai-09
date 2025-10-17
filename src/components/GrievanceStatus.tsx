@@ -112,11 +112,44 @@ export const GrievanceStatus = ({ prescriptionId }: GrievanceStatusProps) => {
           </div>
         )}
 
+        {grievance.ai_decision && grievance.ai_reasoning && (
+          <div className={`p-3 rounded border ${
+            grievance.ai_decision === 'APPROVE' 
+              ? 'bg-green-50 border-green-200' 
+              : grievance.ai_decision === 'DENY'
+              ? 'bg-red-50 border-red-200'
+              : 'bg-yellow-50 border-yellow-200'
+          }`}>
+            <h4 className="font-medium mb-2 flex items-center gap-2">
+              {grievance.ai_decision === 'APPROVE' && <CheckCircle className="w-4 h-4 text-green-600" />}
+              {grievance.ai_decision === 'DENY' && <XCircle className="w-4 h-4 text-red-600" />}
+              {grievance.ai_decision === 'FLAG_REVIEW' && <Clock className="w-4 h-4 text-yellow-600" />}
+              <span className={
+                grievance.ai_decision === 'APPROVE' 
+                  ? 'text-green-800' 
+                  : grievance.ai_decision === 'DENY'
+                  ? 'text-red-800'
+                  : 'text-yellow-800'
+              }>
+                AI Review: {grievance.ai_decision}
+              </span>
+            </h4>
+            <p className="text-sm text-muted-foreground mb-2">
+              {grievance.ai_reasoning}
+            </p>
+            {grievance.ai_reviewed_at && (
+              <p className="text-xs text-muted-foreground">
+                AI reviewed on {new Date(grievance.ai_reviewed_at).toLocaleDateString()} at {new Date(grievance.ai_reviewed_at).toLocaleTimeString()}
+              </p>
+            )}
+          </div>
+        )}
+
         {grievance.reviewed_at && grievance.reviewer_notes && (
           <div>
             <h4 className="font-medium mb-2 flex items-center gap-2">
               <Calendar className="w-4 h-4" />
-              Review Response:
+              Final Review Response:
             </h4>
             <div className="bg-muted/50 p-3 rounded">
               <p className="text-sm text-muted-foreground mb-2">
@@ -129,13 +162,23 @@ export const GrievanceStatus = ({ prescriptionId }: GrievanceStatusProps) => {
           </div>
         )}
 
-        {grievance.status === 'pending' && (
+        {grievance.status === 'pending' && !grievance.ai_decision && (
           <div className="text-sm text-muted-foreground bg-blue-50 p-3 rounded border border-blue-200">
             <div className="flex items-center gap-2 mb-1">
               <Clock className="w-4 h-4 text-blue-600" />
-              <span className="font-medium text-blue-800">Under Review</span>
+              <span className="font-medium text-blue-800">AI Review in Progress</span>
             </div>
-            Your appeal is being reviewed by our team. We'll update you once a decision has been made.
+            Your appeal is being analyzed by our AI system. This usually takes a few moments.
+          </div>
+        )}
+
+        {grievance.status === 'pending' && grievance.ai_decision === 'FLAG_REVIEW' && (
+          <div className="text-sm text-muted-foreground bg-yellow-50 p-3 rounded border border-yellow-200">
+            <div className="flex items-center gap-2 mb-1">
+              <Clock className="w-4 h-4 text-yellow-600" />
+              <span className="font-medium text-yellow-800">Manual Review Required</span>
+            </div>
+            The AI has flagged your appeal for manual review by our medical team. We'll update you once a decision has been made.
           </div>
         )}
       </CardContent>

@@ -11,6 +11,9 @@ export interface Grievance {
   status: 'pending' | 'approved' | 'rejected';
   reviewer_notes: string | null;
   reviewed_at: string | null;
+  ai_decision: string | null;
+  ai_reasoning: string | null;
+  ai_reviewed_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -78,21 +81,66 @@ export const useGrievances = () => {
         documentUrl = fileName;
       }
 
+      // Get prescription details for AI review
+      const { data: prescription, error: prescError } = await supabase
+        .from('prescriptions')
+        .select(`
+          id,
+          insurance_decision,
+          insurance_message,
+          prescription_drugs (
+            drugs (
+              name,
+              strength
+            )
+          )
+        `)
+        .eq('id', prescriptionId)
+        .single();
+
+      if (prescError) {
+        throw new Error(`Failed to fetch prescription: ${prescError.message}`);
+      }
+
       // Create grievance record
-      const { error: insertError } = await supabase
+      const { data: grievanceData, error: insertError } = await supabase
         .from('grievances')
         .insert({
           prescription_id: prescriptionId,
           user_id: user.id,
           explanation,
           document_url: documentUrl,
-        });
+        })
+        .select()
+        .single();
 
       if (insertError) {
         throw insertError;
       }
 
-      // Refresh the grievances list
+      // Extract all medications from prescription
+      const allMedications = prescription.prescription_drugs.map(
+        (pd: any) => `${pd.drugs.name} ${pd.drugs.strength}`
+      );
+
+      // Trigger AI review (don't await to not block the response)
+      supabase.functions.invoke('ai-appeal-review', {
+        body: {
+          grievanceId: grievanceData.id,
+          prescriptionId: prescriptionId,
+          deniedMedications: allMedications,
+          insuranceDecision: prescription.insurance_decision,
+          documentUrl: documentUrl,
+          explanation: explanation,
+        }
+      }).then(() => {
+        // Refresh after AI review completes
+        fetchGrievances();
+      }).catch(err => {
+        console.error('AI review error (non-blocking):', err);
+      });
+
+      // Refresh the grievances list immediately
       await fetchGrievances();
 
       return { success: true };

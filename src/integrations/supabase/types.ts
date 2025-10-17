@@ -84,6 +84,9 @@ export type Database = {
       }
       grievances: {
         Row: {
+          ai_decision: string | null
+          ai_reasoning: string | null
+          ai_reviewed_at: string | null
           created_at: string
           document_url: string | null
           explanation: string
@@ -96,6 +99,9 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          ai_decision?: string | null
+          ai_reasoning?: string | null
+          ai_reviewed_at?: string | null
           created_at?: string
           document_url?: string | null
           explanation: string
@@ -108,6 +114,9 @@ export type Database = {
           user_id: string
         }
         Update: {
+          ai_decision?: string | null
+          ai_reasoning?: string | null
+          ai_reviewed_at?: string | null
           created_at?: string
           document_url?: string | null
           explanation?: string
