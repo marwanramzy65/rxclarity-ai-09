@@ -18,20 +18,79 @@ import {
     Calendar,
     Pill,
     FileText,
-    Eye
+    Eye,
+    Edit
 } from "lucide-react";
 import { useAdminStats } from "@/hooks/useAdminStats";
 import { useAdminPrescriptions } from "@/hooks/useAdminPrescriptions";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 
 const AdminDashboard = () => {
-    const { stats, loading: statsLoading, error: statsError } = useAdminStats();
+    const { stats, loading: statsLoading, error: statsError, refetch: refetchStats } = useAdminStats();
     const [filterStatus, setFilterStatus] = useState<'all' | 'denied' | 'approved' | 'limited' | 'pending'>('all');
-    const { prescriptions, loading: presLoading, error: presError } = useAdminPrescriptions(filterStatus);
+    const { prescriptions, loading: presLoading, error: presError, refreshPrescriptions } = useAdminPrescriptions(filterStatus);
     const [selectedPrescription, setSelectedPrescription] = useState<any>(null);
     const [detailsOpen, setDetailsOpen] = useState(false);
+    const [statusChangeOpen, setStatusChangeOpen] = useState(false);
+    const [newStatus, setNewStatus] = useState<string>('');
+    const [statusMessage, setStatusMessage] = useState<string>('');
+    const [updatingStatus, setUpdatingStatus] = useState(false);
+    const { toast } = useToast();
+
+    const handleStatusChange = async (prescriptionId: string) => {
+        if (!newStatus) {
+            toast({
+                title: "Error",
+                description: "Please select a new status",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        setUpdatingStatus(true);
+        try {
+            const { error } = await supabase
+                .from('prescriptions')
+                .update({
+                    insurance_decision: newStatus,
+                    insurance_message: statusMessage || null,
+                })
+                .eq('id', prescriptionId);
+
+            if (error) throw error;
+
+            toast({
+                title: "Success",
+                description: "Prescription status updated successfully",
+            });
+
+            // Refresh data
+            refreshPrescriptions();
+            refetchStats();
+
+            // Close dialog and reset
+            setStatusChangeOpen(false);
+            setNewStatus('');
+            setStatusMessage('');
+            setSelectedPrescription(null);
+        } catch (error) {
+            console.error('Error updating status:', error);
+            toast({
+                title: "Error",
+                description: error instanceof Error ? error.message : "Failed to update status",
+                variant: "destructive",
+            });
+        } finally {
+            setUpdatingStatus(false);
+        }
+    };
 
     const getInsuranceIcon = (decision: string | null) => {
         switch (decision?.toLowerCase()) {
@@ -371,8 +430,8 @@ const AdminDashboard = () => {
                                             <Card key={prescription.id} className="border-l-4" style={{
                                                 borderLeftColor:
                                                     prescription.insurance_decision === 'approved' ? '#10b981' :
-                                                    prescription.insurance_decision === 'limited' ? '#f59e0b' :
-                                                    prescription.insurance_decision === 'denied' ? '#ef4444' : '#94a3b8'
+                                                        prescription.insurance_decision === 'limited' ? '#f59e0b' :
+                                                            prescription.insurance_decision === 'denied' ? '#ef4444' : '#94a3b8'
                                             }}>
                                                 <CardContent className="p-4">
                                                     <div className="flex flex-col sm:flex-row justify-between gap-4">
@@ -458,6 +517,20 @@ const AdminDashboard = () => {
                                                                     {prescription.drug_interactions.length} Interaction(s)
                                                                 </Badge>
                                                             )}
+
+                                                            <Button
+                                                                variant="default"
+                                                                size="sm"
+                                                                onClick={() => {
+                                                                    setSelectedPrescription(prescription);
+                                                                    setNewStatus(prescription.insurance_decision || '');
+                                                                    setStatusMessage(prescription.insurance_message || '');
+                                                                    setStatusChangeOpen(true);
+                                                                }}
+                                                            >
+                                                                <Edit className="h-4 w-4 mr-1" />
+                                                                Change Status
+                                                            </Button>
 
                                                             <Dialog open={detailsOpen && selectedPrescription?.id === prescription.id} onOpenChange={(open) => {
                                                                 setDetailsOpen(open);
@@ -549,6 +622,106 @@ const AdminDashboard = () => {
                     </TabsContent>
                 </Tabs>
             </div>
+
+            {/* Status Change Dialog */}
+            <Dialog open={statusChangeOpen} onOpenChange={setStatusChangeOpen}>
+                <DialogContent className="sm:max-w-[500px]">
+                    <DialogHeader>
+                        <DialogTitle>Change Prescription Status</DialogTitle>
+                        <DialogDescription>
+                            Update the insurance decision for this prescription
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    {selectedPrescription && (
+                        <div className="space-y-4 py-4">
+                            <div className="space-y-2">
+                                <p className="text-sm text-muted-foreground">
+                                    <span className="font-semibold">Patient:</span> {selectedPrescription.patient_name}
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                    <span className="font-semibold">Current Status:</span>{' '}
+                                    <span className={
+                                        selectedPrescription.insurance_decision === 'approved' ? 'text-success' :
+                                            selectedPrescription.insurance_decision === 'limited' ? 'text-warning' :
+                                                selectedPrescription.insurance_decision === 'denied' ? 'text-destructive' :
+                                                    'text-muted-foreground'
+                                    }>
+                                        {selectedPrescription.insurance_decision || 'Pending'}
+                                    </span>
+                                </p>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="new-status">New Status</Label>
+                                <Select value={newStatus} onValueChange={setNewStatus}>
+                                    <SelectTrigger id="new-status">
+                                        <SelectValue placeholder="Select new status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="approved">
+                                            <div className="flex items-center gap-2">
+                                                <CheckCircle className="h-4 w-4 text-success" />
+                                                <span>Approved</span>
+                                            </div>
+                                        </SelectItem>
+                                        <SelectItem value="limited">
+                                            <div className="flex items-center gap-2">
+                                                <AlertTriangle className="h-4 w-4 text-warning" />
+                                                <span>Limited</span>
+                                            </div>
+                                        </SelectItem>
+                                        <SelectItem value="denied">
+                                            <div className="flex items-center gap-2">
+                                                <XCircle className="h-4 w-4 text-destructive" />
+                                                <span>Denied</span>
+                                            </div>
+                                        </SelectItem>
+                                        <SelectItem value="pending">
+                                            <div className="flex items-center gap-2">
+                                                <Clock className="h-4 w-4 text-muted-foreground" />
+                                                <span>Pending</span>
+                                            </div>
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="status-message">Status Message (Optional)</Label>
+                                <Textarea
+                                    id="status-message"
+                                    placeholder="Enter a message explaining the decision..."
+                                    value={statusMessage}
+                                    onChange={(e) => setStatusMessage(e.target.value)}
+                                    rows={4}
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => {
+                                setStatusChangeOpen(false);
+                                setNewStatus('');
+                                setStatusMessage('');
+                                setSelectedPrescription(null);
+                            }}
+                            disabled={updatingStatus}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={() => selectedPrescription && handleStatusChange(selectedPrescription.id)}
+                            disabled={updatingStatus || !newStatus}
+                        >
+                            {updatingStatus ? 'Updating...' : 'Update Status'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };
