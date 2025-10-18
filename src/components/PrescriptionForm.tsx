@@ -48,6 +48,7 @@ type FormMode = 'selection' | 'photo-upload' | 'medication-review' | 'manual-ent
 const PrescriptionForm = () => {
   const [patientName, setPatientName] = useState("");
   const [patientId, setPatientId] = useState("");
+  const [prescriptionCode, setPrescriptionCode] = useState("");
   const [insuranceId, setInsuranceId] = useState("");
   const [insuranceTier, setInsuranceTier] = useState("Standard");
   const [selectedDrugs, setSelectedDrugs] = useState<SelectedDrug[]>([]);
@@ -81,7 +82,7 @@ const PrescriptionForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!patientName || !patientId || !insuranceId || selectedDrugs.length === 0) {
+    if (!patientName || !patientId || !prescriptionCode || !insuranceId || selectedDrugs.length === 0) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields and add at least one medication.",
@@ -98,6 +99,7 @@ const PrescriptionForm = () => {
         body: {
           patientName,
           patientId,
+          prescriptionCode,
           insuranceId,
           insuranceTier,
           selectedDrugs,
@@ -162,6 +164,7 @@ const PrescriptionForm = () => {
   const resetForm = () => {
     setPatientName("");
     setPatientId("");
+    setPrescriptionCode("");
     setInsuranceId("");
     setSelectedDrugs([]);
     setResults(null);
@@ -285,16 +288,29 @@ const PrescriptionForm = () => {
                 />
               </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="insuranceId" className="text-sm">Insurance ID *</Label>
-              <Input
-                id="insuranceId"
-                value={insuranceId}
-                onChange={(e) => setInsuranceId(e.target.value)}
-                placeholder="Enter insurance ID"
-                className="border-input focus:ring-primary h-10"
-                required
-              />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="prescriptionCode" className="text-sm">Prescription Code *</Label>
+                <Input
+                  id="prescriptionCode"
+                  value={prescriptionCode}
+                  onChange={(e) => setPrescriptionCode(e.target.value.toUpperCase())}
+                  placeholder="RX-2025-001"
+                  className="border-input focus:ring-primary h-10"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="insuranceId" className="text-sm">Insurance ID *</Label>
+                <Input
+                  id="insuranceId"
+                  value={insuranceId}
+                  onChange={(e) => setInsuranceId(e.target.value)}
+                  placeholder="Enter insurance ID"
+                  className="border-input focus:ring-primary h-10"
+                  required
+                />
+              </div>
             </div>
           </CardContent>
         </Card>

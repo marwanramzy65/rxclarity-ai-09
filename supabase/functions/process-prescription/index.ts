@@ -14,7 +14,7 @@ serve(async (req) => {
   }
 
   try {
-    const { patientName, patientId, insuranceId, insuranceTier, selectedDrugs } = await req.json();
+    const { patientName, patientId, prescriptionCode, insuranceId, insuranceTier, selectedDrugs } = await req.json();
     
     // Get Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -35,11 +35,58 @@ serve(async (req) => {
     }
 
     console.log('Processing prescription for user:', user.id);
-    console.log('Prescription details:', { patientName, patientId, insuranceId, insuranceTier, selectedDrugs });
+    console.log('Prescription details:', { patientName, patientId, prescriptionCode, insuranceId, insuranceTier, selectedDrugs });
+
+    // Step 1: Validate prescription code
+    // First check if code exists at all
+    const { data: existingCode, error: existError } = await supabase
+      .from('prescription_codes')
+      .select('*')
+      .eq('code', prescriptionCode)
+      .maybeSingle();
+
+    if (existError) {
+      console.error('Error checking prescription code:', existError);
+      throw new Error('Failed to validate prescription code');
+    }
+
+    if (!existingCode) {
+      console.log('Prescription code does not exist:', prescriptionCode);
+      return new Response(JSON.stringify({ 
+        prescriptionId: null,
+        insuranceDecision: {
+          finalDecision: "denied",
+          message: "Prescription denied: Invalid prescription code. Please verify the code and try again."
+        },
+        drugInteractions: { interactions: [] },
+        processingTime: '0ms'
+      }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!existingCode.is_active) {
+      console.log('Prescription code already used:', prescriptionCode);
+      return new Response(JSON.stringify({ 
+        prescriptionId: null,
+        insuranceDecision: {
+          finalDecision: "denied",
+          message: "Prescription denied: This prescription code has already been submitted before."
+        },
+        drugInteractions: { interactions: [] },
+        processingTime: '0ms'
+      }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    console.log('Prescription code validated:', prescriptionCode);
 
     const startTime = Date.now();
 
-    // Step 1: Create the prescription record
+    // Step 2: Create the prescription record
     const { data: prescription, error: prescriptionError } = await supabase
       .from('prescriptions')
       .insert({
@@ -59,7 +106,18 @@ serve(async (req) => {
 
     console.log('Created prescription:', prescription.id);
 
-    // Step 2: Find or create drug records and link them to the prescription
+    // Deactivate the prescription code so it can't be used again
+    const { error: deactivateError } = await supabase
+      .from('prescription_codes')
+      .update({ is_active: false })
+      .eq('code', prescriptionCode);
+
+    if (deactivateError) {
+      console.error('Error deactivating prescription code:', deactivateError);
+      // Continue anyway - prescription is already created
+    }
+
+    // Step 3: Find or create drug records and link them to the prescription
     const prescriptionDrugs = [];
     
     for (const selectedDrug of selectedDrugs) {
@@ -119,7 +177,7 @@ serve(async (req) => {
       });
     }
 
-    // Step 3: Call drug interaction check
+    // Step 4: Call drug interaction check
     let drugInteractions = { interactions: [] };
     try {
       const interactionResponse = await supabase.functions.invoke('drug-interaction-check', {
@@ -151,7 +209,7 @@ serve(async (req) => {
       console.error('Error calling drug interaction check:', error);
     }
 
-    // Step 4: Call insurance check
+    // Step 5: Call insurance check
     let insuranceDecision = {
       finalDecision: "approved",
       message: "Coverage approved under standard policy."
@@ -175,7 +233,7 @@ serve(async (req) => {
       console.error('Error calling insurance check:', error);
     }
 
-    // Step 5: Update prescription with results
+    // Step 6: Update prescription with results
     const processingTime = Date.now() - startTime;
     
     const { error: updateError } = await supabase
