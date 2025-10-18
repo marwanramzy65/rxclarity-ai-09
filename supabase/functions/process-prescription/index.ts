@@ -14,7 +14,7 @@ serve(async (req) => {
   }
 
   try {
-    const { patientName, patientId, insuranceId, insuranceTier, selectedDrugs } = await req.json();
+    const { patientName, patientId, prescriptionCode, insuranceId, insuranceTier, selectedDrugs } = await req.json();
     
     // Get Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -35,11 +35,43 @@ serve(async (req) => {
     }
 
     console.log('Processing prescription for user:', user.id);
-    console.log('Prescription details:', { patientName, patientId, insuranceId, insuranceTier, selectedDrugs });
+    console.log('Prescription details:', { patientName, patientId, prescriptionCode, insuranceId, insuranceTier, selectedDrugs });
+
+    // Step 1: Validate prescription code
+    const { data: codeData, error: codeError } = await supabase
+      .from('prescription_codes')
+      .select('*')
+      .eq('code', prescriptionCode)
+      .eq('is_active', true)
+      .maybeSingle();
+
+    if (codeError) {
+      console.error('Error checking prescription code:', codeError);
+      throw new Error('Failed to validate prescription code');
+    }
+
+    if (!codeData) {
+      console.log('Invalid prescription code:', prescriptionCode);
+      return new Response(JSON.stringify({ 
+        error: 'Invalid prescription code',
+        prescriptionId: null,
+        insuranceDecision: {
+          finalDecision: "denied",
+          message: "Prescription denied: Invalid or inactive prescription code. Please verify the code and try again."
+        },
+        drugInteractions: { interactions: [] },
+        processingTime: '0ms'
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    console.log('Prescription code validated:', prescriptionCode);
 
     const startTime = Date.now();
 
-    // Step 1: Create the prescription record
+    // Step 2: Create the prescription record
     const { data: prescription, error: prescriptionError } = await supabase
       .from('prescriptions')
       .insert({
@@ -59,7 +91,7 @@ serve(async (req) => {
 
     console.log('Created prescription:', prescription.id);
 
-    // Step 2: Find or create drug records and link them to the prescription
+    // Step 3: Find or create drug records and link them to the prescription
     const prescriptionDrugs = [];
     
     for (const selectedDrug of selectedDrugs) {
@@ -119,7 +151,7 @@ serve(async (req) => {
       });
     }
 
-    // Step 3: Call drug interaction check
+    // Step 4: Call drug interaction check
     let drugInteractions = { interactions: [] };
     try {
       const interactionResponse = await supabase.functions.invoke('drug-interaction-check', {
@@ -151,7 +183,7 @@ serve(async (req) => {
       console.error('Error calling drug interaction check:', error);
     }
 
-    // Step 4: Call insurance check
+    // Step 5: Call insurance check
     let insuranceDecision = {
       finalDecision: "approved",
       message: "Coverage approved under standard policy."
@@ -175,7 +207,7 @@ serve(async (req) => {
       console.error('Error calling insurance check:', error);
     }
 
-    // Step 5: Update prescription with results
+    // Step 6: Update prescription with results
     const processingTime = Date.now() - startTime;
     
     const { error: updateError } = await supabase
