@@ -53,30 +53,35 @@ serve(async (req) => {
   }
 
   try {
-    const LLAMA_API_KEY = Deno.env.get('LLAMA_API_KEY');
+    const AZURE_CHAT_API_KEY = Deno.env.get('AZURE_CHAT_API_KEY');
+    const AZURE_CHAT_ENDPOINT = Deno.env.get('AZURE_CHAT_ENDPOINT') || 'https://aioptexeg.services.ai.azure.com/openai/v1/';
+    const AZURE_CHAT_DEPLOYMENT = Deno.env.get('AZURE_CHAT_DEPLOYMENT') || 'Phi-4';
+    const AZURE_VISION_API_KEY = Deno.env.get('AZURE_AI_API_KEY_VISION');
+    const AZURE_VISION_ENDPOINT = Deno.env.get('AZURE_VISION_ENDPOINT');
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-    if (!LLAMA_API_KEY) {
-      throw new Error('LLAMA_API_KEY not configured');
+    if (!AZURE_CHAT_API_KEY) {
+      throw new Error('AZURE_CHAT_API_KEY not configured');
     }
 
     const supabaseAdmin = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
 
-    const { 
+    const {
       grievanceId,
       prescriptionId,
       deniedMedications,
       insuranceDecision,
       documentUrl,
-      explanation 
+      explanation
     } = await req.json();
 
     console.log('Processing AI appeal review for grievance:', grievanceId);
 
     let documentContent = '';
-    
-    // If there's a document, download and extract text
+    let extractedLabResults = '';
+
+    // If there's a document, use Azure AI Vision to extract and analyze it
     if (documentUrl) {
       console.log('Downloading document from:', documentUrl);
       const { data: fileData, error: downloadError } = await supabaseAdmin.storage
@@ -85,8 +90,57 @@ serve(async (req) => {
 
       if (downloadError) {
         console.error('Error downloading document:', downloadError);
+        documentContent = '[Document could not be downloaded]';
+      } else if (AZURE_VISION_API_KEY && AZURE_VISION_ENDPOINT) {
+        try {
+          console.log('Analyzing document with Azure AI Vision...');
+
+          // Convert file to base64 for Azure Vision
+          const arrayBuffer = await fileData.arrayBuffer();
+          const uint8Array = new Uint8Array(arrayBuffer);
+
+          // Call Azure AI Vision with read feature to extract text from lab report
+          const visionResponse = await fetch(
+            `${AZURE_VISION_ENDPOINT}/computervision/imageanalysis:analyze?features=read&api-version=2024-02-01`,
+            {
+              method: 'POST',
+              headers: {
+                'Ocp-Apim-Subscription-Key': AZURE_VISION_API_KEY,
+                'Content-Type': 'application/octet-stream',
+              },
+              body: uint8Array,
+            }
+          );
+
+          if (visionResponse.ok) {
+            const visionData = await visionResponse.json();
+
+            // Extract text from the readResult
+            if (visionData.readResult?.blocks) {
+              const extractedLines: string[] = [];
+              for (const block of visionData.readResult.blocks) {
+                for (const line of block.lines) {
+                  extractedLines.push(line.text);
+                }
+              }
+              extractedLabResults = extractedLines.join('\n');
+              console.log('Extracted lab results from document:', extractedLabResults);
+
+              documentContent = `[Lab Test Results Extracted from Document]\n${extractedLabResults}`;
+            } else {
+              documentContent = '[Document uploaded but no text could be extracted]';
+            }
+          } else {
+            const errorText = await visionResponse.text();
+            console.error('Azure Vision API error:', visionResponse.status, errorText);
+            documentContent = '[Document uploaded but could not be analyzed]';
+          }
+        } catch (visionError) {
+          console.error('Error analyzing document with Azure Vision:', visionError);
+          documentContent = '[Document uploaded but analysis failed]';
+        }
       } else {
-        // Convert blob to base64 for AI analysis
+        // Fallback if Azure Vision not configured
         const arrayBuffer = await fileData.arrayBuffer();
         const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
         documentContent = `[Document uploaded: ${documentUrl}. This is a lab test or medical document that should be analyzed to determine if the denied medication is medically necessary.]`;
@@ -121,17 +175,20 @@ RESPOND IN THIS EXACT JSON FORMAT:
   "requires_review": ["list needing manual review"]
 }`;
 
-    console.log('Sending request to Llama AI...');
+    console.log(`Sending request to Azure AI (${AZURE_CHAT_DEPLOYMENT})...`);
 
-    // Call Llama AI API
-    const aiResponse = await fetch('https://api.llama-api.com/chat/completions', {
+    // Ensure endpoint ends with slash
+    const baseURL = AZURE_CHAT_ENDPOINT.endsWith('/') ? AZURE_CHAT_ENDPOINT : `${AZURE_CHAT_ENDPOINT}/`;
+
+    // Call Azure AI Chat API (Phi-4 or Llama-3.3-70B)
+    const aiResponse = await fetch(`${baseURL}chat/completions`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${LLAMA_API_KEY}`,
+        'Authorization': `Bearer ${AZURE_CHAT_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'Llama-4-Maverick-17B-128E-Instruct-FP8',
+        model: AZURE_CHAT_DEPLOYMENT,
         messages: [
           {
             role: 'system',
@@ -149,15 +206,15 @@ RESPOND IN THIS EXACT JSON FORMAT:
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
-      console.error('Llama AI API error:', aiResponse.status, errorText);
-      throw new Error(`Llama AI API error: ${aiResponse.status}`);
+      console.error('Azure AI API error:', aiResponse.status, errorText);
+      throw new Error(`Azure AI API error: ${aiResponse.status}`);
     }
 
     const aiData = await aiResponse.json();
     console.log('AI Response received:', aiData);
 
     const aiContent = aiData.choices?.[0]?.message?.content || '';
-    
+
     // Parse AI response
     let aiDecision;
     try {
@@ -200,10 +257,10 @@ RESPOND IN THIS EXACT JSON FORMAT:
         reviewer_notes: isFullyApproved
           ? `✅ AI Auto-Approved: All medications covered. ${aiDecision.reasoning}`
           : hasStillDenied
-          ? `⚠️ Partial Approval: Some medications still denied. Approved: ${aiDecision.covered_medications?.join(', ') || 'none'}. Still Denied: ${aiDecision.still_denied?.join(', ')}. ${aiDecision.reasoning}`
-          : aiDecision.decision === 'DENY'
-          ? `❌ AI Denied: ${aiDecision.reasoning}`
-          : `⚠️ Flagged for Review: ${aiDecision.reasoning}`,
+            ? `⚠️ Partial Approval: Some medications still denied. Approved: ${aiDecision.covered_medications?.join(', ') || 'none'}. Still Denied: ${aiDecision.still_denied?.join(', ')}. ${aiDecision.reasoning}`
+            : aiDecision.decision === 'DENY'
+              ? `❌ AI Denied: ${aiDecision.reasoning}`
+              : `⚠️ Flagged for Review: ${aiDecision.reasoning}`,
         reviewed_at: isFullyApproved ? new Date().toISOString() : null
       })
       .eq('id', grievanceId);
@@ -214,6 +271,48 @@ RESPOND IN THIS EXACT JSON FORMAT:
     }
 
     console.log('Grievance updated successfully');
+
+    // If appeal is approved (fully or partially), update the prescription's insurance decision
+    if (isFullyApproved || (aiDecision.covered_medications && aiDecision.covered_medications.length > 0)) {
+      console.log('Updating prescription insurance decision...');
+
+      let newInsuranceDecision;
+      let newInsuranceMessage;
+
+      if (isFullyApproved) {
+        // All medications approved
+        newInsuranceDecision = 'approved';
+        newInsuranceMessage = `Appeal approved: ${aiDecision.reasoning}`;
+      } else if (hasStillDenied && aiDecision.covered_medications && aiDecision.covered_medications.length > 0) {
+        // Partial approval
+        newInsuranceDecision = 'limited';
+        newInsuranceMessage = `Appeal partially approved. Covered: ${aiDecision.covered_medications.join(', ')}. Still denied: ${aiDecision.still_denied.join(', ')}. ${aiDecision.reasoning}`;
+      } else {
+        // Keep original decision if appeal was denied or flagged
+        newInsuranceDecision = null;
+        newInsuranceMessage = null;
+      }
+
+      if (newInsuranceDecision && newInsuranceMessage) {
+        const { error: prescriptionUpdateError } = await supabaseAdmin
+          .from('prescriptions')
+          .update({
+            insurance_decision: newInsuranceDecision,
+            insurance_message: newInsuranceMessage,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', prescriptionId);
+
+        if (prescriptionUpdateError) {
+          console.error('Error updating prescription:', prescriptionUpdateError);
+          // Don't throw error here - grievance update was successful
+        } else {
+          console.log('Prescription insurance decision updated successfully');
+        }
+      }
+    }
+
+    console.log('Appeal review process completed');
 
     return new Response(
       JSON.stringify({

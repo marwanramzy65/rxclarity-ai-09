@@ -14,7 +14,7 @@ serve(async (req) => {
 
   try {
     const { drugs, insuranceTier, patientInfo } = await req.json();
-    
+
     if (!drugs || !Array.isArray(drugs) || drugs.length === 0) {
       return new Response(
         JSON.stringify({ error: 'No drugs provided for insurance check' }),
@@ -32,53 +32,49 @@ serve(async (req) => {
     // Format drugs list for the prompt
     const drugsList = drugs.map(drug => `${drug.name} ${drug.strength} (Qty: ${drug.quantity})`).join(', ');
 
-    const prompt = `You are an insurance coverage AI for a pharmacy system. Analyze the following prescription for insurance coverage based on the patient's insurance tier.
+    const prompt = `# ROLE AND GOAL
+You are "PharmAVerse AI" processing a First Prescription Submission WITHOUT any attached lab results or clinical notes. You must evaluate coverage based on the "First Fill Policy".
 
-Patient Insurance Tier: ${insuranceTier || 'Standard'}
-Prescribed Medications: ${drugsList}
+# "FIRST FILL" POLICY AND DECISION-MAKING LOGIC
 
-Insurance Coverage Rules:
-**Basic Tier:**
-- Generic drugs: 90% coverage
-- Brand drugs: 70% coverage  
-- Specialty drugs: 50% coverage
-- Monthly limit: $500
+### Tier 1: 🟥 AUTO-DENY (Always Denied)
+- Category: Multivitamins, Cosmetics, Weight Management, Sexual Enhancement, Herbal & OTC Tonics. (e.g., Vitamax, Perfectil, Orlistat, Viagra).
+- Decision: denied. Reason: "Preventive, cosmetic, or lifestyle drug not covered by policy."
 
-**Standard Tier:**
-- Generic drugs: 95% coverage
-- Brand drugs: 80% coverage
-- Specialty drugs: 70% coverage
-- Monthly limit: $1000
+### Tier 2: 🟩 PROVISIONAL_COVER (First Fill Approved)
+- Class: Acute Condition Medications (Antibiotics like Augmentin; Analgesics like Brufen).
+- Decision: approved. Reason: "Standard course for acute condition covered on first fill."
+- Class: Chronic Disease Medications (Antihypertensives like Concor; Antidiabetics like Glucophage).
+- Decision: approved. Reason: "Provisional one-month supply approved. A medical report with diagnosis is required for future refills."
 
-**Premium Tier:**
-- Generic drugs: 98% coverage
-- Brand drugs: 90% coverage
-- Specialty drugs: 85% coverage
-- Monthly limit: $2000
+### Tier 3: 🟨 FLAG_REVIEW (Requires Documentation, Even for First Fill)
+- Class: Lab-Dependent Supplements (Iron like Ferrotron; Vitamin D like Sanso D).
+- Decision: limited. Reason: "Requires lab test results for coverage."
+- Class: Specialist & High-Cost Medications (Psychiatric meds like Cipralex; Hormonal therapies like Eltroxin; Biologics like Humira).
+- Decision: limited. Reason: "Requires specialist medical report and diagnosis confirmation."
 
-**VIP Tier:**
-- Generic drugs: 100% coverage
-- Brand drugs: 95% coverage
-- Specialty drugs: 90% coverage
-- Monthly limit: $5000
-
-Common Drug Classifications:
-- Generic: Metformin, Lisinopril, Atorvastatin, Amlodipine, Levothyroxine, Omeprazole, Losartan
-- Brand: Newer formulations, brand-name versions
-- Specialty: High-cost medications, biologics, cancer drugs
-
-Provide a decision in this exact JSON format:
+# OUTPUT FORMAT
+Provide the decision in the exact JSON format below, with no extra text.
 {
   "finalDecision": "approved" | "limited" | "denied",
-  "message": "Detailed explanation of the coverage decision and any conditions"
+  "message": "A brief summary of the decision.",
+  "details": [
+    {
+      "name": "Medication Name",
+      "decision": "approved" | "denied" | "limited",
+      "reason": "Specific reason based on the policy."
+    }
+  ]
 }
 
-Decision Guidelines:
-- "approved": Full coverage under the tier rules
-- "limited": Partial coverage with conditions (prior auth, quantity limits, etc.)
-- "denied": Not covered or exceeds limits
+IMPORTANT: 
+- Use "approved" for medications that are covered
+- Use "limited" for medications that need additional documentation or review
+- Use "denied" for medications that are not covered
+- finalDecision should be "approved" if all medications approved, "limited" if any need review, "denied" if all denied
 
-Analyze the prescription and provide the insurance decision:`;
+Analyze the following prescription and provide your response:
+${drugsList}`;
 
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
@@ -118,7 +114,7 @@ Analyze the prescription and provide the insurance decision:`;
     try {
       // Try multiple parsing strategies
       let jsonText = generatedText;
-      
+
       // Strategy 1: Look for JSON block in markdown
       const jsonMatch = generatedText.match(/```json\s*(\{.*?\})\s*```/s);
       if (jsonMatch) {
@@ -137,21 +133,34 @@ Analyze the prescription and provide the insurance decision:`;
           }
         }
       }
-      
+
       insuranceDecision = JSON.parse(jsonText.trim());
-      
+
       // Validate required fields
       if (!insuranceDecision.finalDecision || !insuranceDecision.message) {
         throw new Error('Missing required fields in insurance decision');
       }
-      
+
+      // Ensure finalDecision is lowercase and valid
+      insuranceDecision.finalDecision = insuranceDecision.finalDecision.toLowerCase();
+      if (!['approved', 'limited', 'denied'].includes(insuranceDecision.finalDecision)) {
+        console.warn('Invalid finalDecision value, defaulting to approved');
+        insuranceDecision.finalDecision = 'approved';
+      }
+
+      // Ensure details array exists
+      if (!insuranceDecision.details) {
+        insuranceDecision.details = [];
+      }
+
     } catch (parseError) {
       console.error('Failed to parse Groq response:', generatedText);
-      console.error('Parse error:', parseError.message);
+      console.error('Parse error:', (parseError as Error).message);
       // Fallback decision
       insuranceDecision = {
         finalDecision: "approved",
-        message: "Coverage approved under standard policy. Manual review may be required for final determination."
+        message: "Coverage approved under standard policy. Manual review may be required for final determination.",
+        details: []
       };
     }
 
@@ -162,8 +171,8 @@ Analyze the prescription and provide the insurance decision:`;
   } catch (error) {
     console.error('Error in insurance-check function:', error);
     return new Response(
-      JSON.stringify({ 
-        error: error.message,
+      JSON.stringify({
+        error: (error as Error).message,
         finalDecision: "approved",
         message: "System error occurred. Prescription approved pending manual review."
       }), {
