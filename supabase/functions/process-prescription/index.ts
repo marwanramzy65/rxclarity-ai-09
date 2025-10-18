@@ -38,25 +38,41 @@ serve(async (req) => {
     console.log('Prescription details:', { patientName, patientId, prescriptionCode, insuranceId, insuranceTier, selectedDrugs });
 
     // Step 1: Validate prescription code
-    const { data: codeData, error: codeError } = await supabase
+    // First check if code exists at all
+    const { data: existingCode, error: existError } = await supabase
       .from('prescription_codes')
       .select('*')
       .eq('code', prescriptionCode)
-      .eq('is_active', true)
       .maybeSingle();
 
-    if (codeError) {
-      console.error('Error checking prescription code:', codeError);
+    if (existError) {
+      console.error('Error checking prescription code:', existError);
       throw new Error('Failed to validate prescription code');
     }
 
-    if (!codeData) {
-      console.log('Invalid or inactive prescription code:', prescriptionCode);
+    if (!existingCode) {
+      console.log('Prescription code does not exist:', prescriptionCode);
       return new Response(JSON.stringify({ 
         prescriptionId: null,
         insuranceDecision: {
           finalDecision: "denied",
-          message: "Prescription denied: Invalid or inactive prescription code. Please verify the code and try again."
+          message: "Prescription denied: Invalid prescription code. Please verify the code and try again."
+        },
+        drugInteractions: { interactions: [] },
+        processingTime: '0ms'
+      }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!existingCode.is_active) {
+      console.log('Prescription code already used:', prescriptionCode);
+      return new Response(JSON.stringify({ 
+        prescriptionId: null,
+        insuranceDecision: {
+          finalDecision: "denied",
+          message: "Prescription denied: This prescription code has already been submitted before."
         },
         drugInteractions: { interactions: [] },
         processingTime: '0ms'
@@ -89,6 +105,17 @@ serve(async (req) => {
     }
 
     console.log('Created prescription:', prescription.id);
+
+    // Deactivate the prescription code so it can't be used again
+    const { error: deactivateError } = await supabase
+      .from('prescription_codes')
+      .update({ is_active: false })
+      .eq('code', prescriptionCode);
+
+    if (deactivateError) {
+      console.error('Error deactivating prescription code:', deactivateError);
+      // Continue anyway - prescription is already created
+    }
 
     // Step 3: Find or create drug records and link them to the prescription
     const prescriptionDrugs = [];
