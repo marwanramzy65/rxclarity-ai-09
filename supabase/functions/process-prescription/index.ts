@@ -51,9 +51,8 @@ serve(async (req) => {
     }
 
     if (!codeData) {
-      console.log('Invalid prescription code:', prescriptionCode);
+      console.log('Invalid or inactive prescription code:', prescriptionCode);
       return new Response(JSON.stringify({ 
-        error: 'Invalid prescription code',
         prescriptionId: null,
         insuranceDecision: {
           finalDecision: "denied",
@@ -62,7 +61,7 @@ serve(async (req) => {
         drugInteractions: { interactions: [] },
         processingTime: '0ms'
       }), {
-        status: 400,
+        status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
