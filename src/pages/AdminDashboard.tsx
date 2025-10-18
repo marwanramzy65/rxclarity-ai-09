@@ -28,7 +28,7 @@ import { format } from "date-fns";
 
 const AdminDashboard = () => {
     const { stats, loading: statsLoading, error: statsError } = useAdminStats();
-    const [filterStatus, setFilterStatus] = useState<'all' | 'denied' | 'approved' | 'pending'>('all');
+    const [filterStatus, setFilterStatus] = useState<'all' | 'denied' | 'approved' | 'limited' | 'pending'>('all');
     const { prescriptions, loading: presLoading, error: presError } = useAdminPrescriptions(filterStatus);
     const [selectedPrescription, setSelectedPrescription] = useState<any>(null);
     const [detailsOpen, setDetailsOpen] = useState(false);
@@ -37,6 +37,8 @@ const AdminDashboard = () => {
         switch (decision?.toLowerCase()) {
             case "approved":
                 return <CheckCircle className="h-5 w-5 text-success" />;
+            case "limited":
+                return <AlertTriangle className="h-5 w-5 text-warning" />;
             case "denied":
                 return <XCircle className="h-5 w-5 text-destructive" />;
             default:
@@ -48,10 +50,12 @@ const AdminDashboard = () => {
         switch (decision?.toLowerCase()) {
             case "approved":
                 return "approved";
+            case "limited":
+                return "limited";
             case "denied":
                 return "denied";
             default:
-                return "processing";
+                return "pending";
         }
     };
 
@@ -101,7 +105,7 @@ const AdminDashboard = () => {
                     {/* Statistics Tab */}
                     <TabsContent value="overview" className="space-y-6">
                         {/* Main Stats */}
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+                        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-6">
                             <Card className="bg-gradient-card border-0 shadow-card-medical">
                                 <CardContent className="p-3 sm:p-6">
                                     <div className="flex items-center justify-between">
@@ -129,6 +133,22 @@ const AdminDashboard = () => {
                                         </div>
                                         <StatusBadge variant="approved" className="text-xs sm:text-sm">
                                             {statsLoading ? "..." : statsError ? "Error" : `${stats.approvedPercentage}%`}
+                                        </StatusBadge>
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            <Card className="bg-gradient-card border-0 shadow-card-medical">
+                                <CardContent className="p-3 sm:p-6">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-xs sm:text-sm text-muted-foreground">Limited</p>
+                                            <p className="text-lg sm:text-2xl font-bold text-warning">
+                                                {statsLoading ? "..." : statsError ? "Error" : stats.limitedCount}
+                                            </p>
+                                        </div>
+                                        <StatusBadge variant="limited" className="text-xs sm:text-sm">
+                                            {statsLoading ? "..." : statsError ? "Error" : `${stats.limitedPercentage}%`}
                                         </StatusBadge>
                                     </div>
                                 </CardContent>
@@ -303,6 +323,14 @@ const AdminDashboard = () => {
                                             Approved
                                         </Button>
                                         <Button
+                                            variant={filterStatus === 'limited' ? 'default' : 'outline'}
+                                            size="sm"
+                                            onClick={() => setFilterStatus('limited')}
+                                        >
+                                            <AlertTriangle className="h-4 w-4 mr-1" />
+                                            Limited
+                                        </Button>
+                                        <Button
                                             variant={filterStatus === 'denied' ? 'default' : 'outline'}
                                             size="sm"
                                             onClick={() => setFilterStatus('denied')}
@@ -343,7 +371,8 @@ const AdminDashboard = () => {
                                             <Card key={prescription.id} className="border-l-4" style={{
                                                 borderLeftColor:
                                                     prescription.insurance_decision === 'approved' ? '#10b981' :
-                                                        prescription.insurance_decision === 'denied' ? '#ef4444' : '#94a3b8'
+                                                    prescription.insurance_decision === 'limited' ? '#f59e0b' :
+                                                    prescription.insurance_decision === 'denied' ? '#ef4444' : '#94a3b8'
                                             }}>
                                                 <CardContent className="p-4">
                                                     <div className="flex flex-col sm:flex-row justify-between gap-4">

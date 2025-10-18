@@ -5,9 +5,11 @@ interface AdminStats {
     totalPrescriptions: number;
     approvedCount: number;
     deniedCount: number;
+    limitedCount: number;
     pendingCount: number;
     approvedPercentage: number;
     deniedPercentage: number;
+    limitedPercentage: number;
     totalPatients: number;
     totalPharmacies: number;
     totalAppeals: number;
@@ -22,9 +24,11 @@ export const useAdminStats = () => {
         totalPrescriptions: 0,
         approvedCount: 0,
         deniedCount: 0,
+        limitedCount: 0,
         pendingCount: 0,
         approvedPercentage: 0,
         deniedPercentage: 0,
+        limitedPercentage: 0,
         totalPatients: 0,
         totalPharmacies: 0,
         totalAppeals: 0,
@@ -73,6 +77,9 @@ export const useAdminStats = () => {
             const deniedCount = allPrescriptions?.filter(p =>
                 p.insurance_decision?.toLowerCase() === 'denied'
             ).length || 0;
+            const limitedCount = allPrescriptions?.filter(p =>
+                p.insurance_decision?.toLowerCase() === 'limited'
+            ).length || 0;
             const pendingCount = allPrescriptions?.filter(p =>
                 !p.insurance_decision || p.insurance_decision?.toLowerCase() === 'pending'
             ).length || 0;
@@ -82,6 +89,9 @@ export const useAdminStats = () => {
                 : 0;
             const deniedPercentage = totalPrescriptions > 0
                 ? Math.round((deniedCount / totalPrescriptions) * 100)
+                : 0;
+            const limitedPercentage = totalPrescriptions > 0
+                ? Math.round((limitedCount / totalPrescriptions) * 100)
                 : 0;
 
             // Calculate unique patients and pharmacies
@@ -100,9 +110,11 @@ export const useAdminStats = () => {
                 totalPrescriptions,
                 approvedCount,
                 deniedCount,
+                limitedCount,
                 pendingCount,
                 approvedPercentage,
                 deniedPercentage,
+                limitedPercentage,
                 totalPatients: uniquePatients.size,
                 totalPharmacies: uniquePharmacies.size,
                 totalAppeals,

@@ -35,7 +35,7 @@ interface AdminPrescription {
     }>;
 }
 
-export const useAdminPrescriptions = (filterStatus?: 'all' | 'denied' | 'approved' | 'pending') => {
+export const useAdminPrescriptions = (filterStatus?: 'all' | 'denied' | 'approved' | 'limited' | 'pending') => {
     const [prescriptions, setPrescriptions] = useState<AdminPrescription[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -87,6 +87,8 @@ export const useAdminPrescriptions = (filterStatus?: 'all' | 'denied' | 'approve
                 query = query.eq('insurance_decision', 'denied');
             } else if (filterStatus === 'approved') {
                 query = query.eq('insurance_decision', 'approved');
+            } else if (filterStatus === 'limited') {
+                query = query.eq('insurance_decision', 'limited');
             } else if (filterStatus === 'pending') {
                 query = query.is('insurance_decision', null);
             }
