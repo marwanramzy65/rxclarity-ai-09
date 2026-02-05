@@ -190,15 +190,21 @@ serve(async (req) => {
         // Store interactions in database
         if (drugInteractions.interactions && drugInteractions.interactions.length > 0) {
           for (const interaction of drugInteractions.interactions) {
+            // Extract drug names from drug_pair array
+            const drug1Name = interaction.drug_pair?.[0] || '';
+            const drug2Name = interaction.drug_pair?.[1] || '';
+            
             await supabase
               .from('drug_interactions')
               .insert({
                 prescription_id: prescription.id,
-                drug_pair: interaction.drug_pair,
+                drug1_name: drug1Name,
+                drug2_name: drug2Name,
+                drug_pair: interaction.drug_pair || [],
                 severity: interaction.severity,
-                interaction_type: interaction.interaction_type,
+                interaction_type: interaction.interaction_type || 'pharmacodynamic',
                 description: interaction.description,
-                recommendation: interaction.recommendation,
+                recommendation: interaction.recommendation || '',
               });
           }
         }

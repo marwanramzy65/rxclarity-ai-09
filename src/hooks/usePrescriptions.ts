@@ -19,6 +19,8 @@ interface Prescription {
     quantity: number;
   }>;
   drug_interactions: Array<{
+    drug1_name: string;
+    drug2_name: string;
     drug_pair: string[];
     severity: string;
     interaction_type: string;
@@ -63,6 +65,8 @@ export const usePrescriptions = () => {
             )
           ),
           drug_interactions (
+            drug1_name,
+            drug2_name,
             drug_pair,
             severity,
             interaction_type,

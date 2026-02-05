@@ -351,10 +351,15 @@ const PrescriptionHistory = () => {
                             ) : (
                               <div className="space-y-3">
                                 {prescription.drug_interactions.map((interaction: any, index: number) => {
-                                  const severityVariant = interaction.severity.toLowerCase() === "yellow" ? "yellow" : "red";
-                                  const severityIcon = interaction.severity.toLowerCase() === "yellow" 
+                                  const severityVariant = interaction.severity?.toLowerCase() === "yellow" ? "yellow" : "red";
+                                  const severityIcon = interaction.severity?.toLowerCase() === "yellow" 
                                     ? <AlertTriangle className="h-4 w-4 text-warning" />
                                     : <XCircle className="h-4 w-4 text-destructive" />;
+                                  
+                                  // Build drug pair string from drug1_name and drug2_name or drug_pair array
+                                  const drugPairStr = interaction.drug_pair && Array.isArray(interaction.drug_pair) && interaction.drug_pair.length > 0
+                                    ? interaction.drug_pair.join(' + ')
+                                    : `${interaction.drug1_name || ''} + ${interaction.drug2_name || ''}`;
 
                                   return (
                                     <div key={index} className="p-4 bg-background border rounded-lg space-y-3">
@@ -362,11 +367,11 @@ const PrescriptionHistory = () => {
                                         <div className="flex items-center space-x-2">
                                           {severityIcon}
                                           <span className="font-medium">
-                                            {interaction.drug_pair.join(" + ")}
+                                            {drugPairStr}
                                           </span>
                                         </div>
                                         <StatusBadge variant={severityVariant as any}>
-                                          {interaction.severity} - {interaction.interaction_type}
+                                          {interaction.severity} - {interaction.interaction_type || 'Interaction'}
                                         </StatusBadge>
                                       </div>
                                       

@@ -93,9 +93,10 @@ export const useDetailedStats = () => {
             drugs(name, strength, generic_name)
           ),
           drug_interactions(
+            drug1_name,
+            drug2_name,
             severity,
-            interaction_type,
-            drug_pair
+            description
           )
         `)
         .eq('user_id', user?.id)
@@ -279,10 +280,8 @@ function calculateInteractionAnalysis(prescriptions: any[]) {
       const severity = interaction.severity || 'Unknown';
       severityCounts[severity] = (severityCounts[severity] || 0) + 1;
       
-      // Common pairs
-      const pairKey = Array.isArray(interaction.drug_pair) 
-        ? interaction.drug_pair.join(' + ')
-        : String(interaction.drug_pair);
+      // Common pairs - use drug1_name + drug2_name
+      const pairKey = `${interaction.drug1_name || ''} + ${interaction.drug2_name || ''}`;
       
       if (!pairCounts[pairKey]) {
         pairCounts[pairKey] = { count: 0, severity };
