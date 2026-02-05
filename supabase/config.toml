@@ -1,1 +1,19 @@
 project_id = "rtovcwbyigkkzbxitcuo"
+
+[functions.process-prescription]
+verify_jwt = false
+
+[functions.drug-interaction-check]
+verify_jwt = false
+
+[functions.insurance-check]
+verify_jwt = false
+
+[functions.extract-prescription]
+verify_jwt = false
+
+[functions.ai-appeal-review]
+verify_jwt = false
+
+[functions.generate-prescription-codes]
+verify_jwt = false
