@@ -18,28 +18,37 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
+          drug_pair: string[] | null
           drug1_name: string
           drug2_name: string
           id: string
+          interaction_type: string | null
           prescription_id: string
+          recommendation: string | null
           severity: string
         }
         Insert: {
           created_at?: string
           description?: string | null
+          drug_pair?: string[] | null
           drug1_name: string
           drug2_name: string
           id?: string
+          interaction_type?: string | null
           prescription_id: string
+          recommendation?: string | null
           severity: string
         }
         Update: {
           created_at?: string
           description?: string | null
+          drug_pair?: string[] | null
           drug1_name?: string
           drug2_name?: string
           id?: string
+          interaction_type?: string | null
           prescription_id?: string
+          recommendation?: string | null
           severity?: string
         }
         Relationships: [
@@ -275,26 +284,38 @@ export type Database = {
       }
       patients: {
         Row: {
+          address: string | null
+          age: number | null
           created_at: string
+          email: string | null
           id: string
           patient_id: string
           patient_name: string
+          phone: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          address?: string | null
+          age?: number | null
           created_at?: string
+          email?: string | null
           id?: string
           patient_id: string
           patient_name: string
+          phone?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          address?: string | null
+          age?: number | null
           created_at?: string
+          email?: string | null
           id?: string
           patient_id?: string
           patient_name?: string
+          phone?: string | null
           updated_at?: string
           user_id?: string
         }
