@@ -14,7 +14,394 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      drug_interactions: {
+        Row: {
+          created_at: string
+          description: string | null
+          drug1_name: string
+          drug2_name: string
+          id: string
+          prescription_id: string
+          severity: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          drug1_name: string
+          drug2_name: string
+          id?: string
+          prescription_id: string
+          severity: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          drug1_name?: string
+          drug2_name?: string
+          id?: string
+          prescription_id?: string
+          severity?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drug_interactions_prescription_id_fkey"
+            columns: ["prescription_id"]
+            isOneToOne: false
+            referencedRelation: "prescriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      drugs: {
+        Row: {
+          created_at: string
+          generic_name: string | null
+          id: string
+          name: string
+          strength: string
+        }
+        Insert: {
+          created_at?: string
+          generic_name?: string | null
+          id?: string
+          name: string
+          strength: string
+        }
+        Update: {
+          created_at?: string
+          generic_name?: string | null
+          id?: string
+          name?: string
+          strength?: string
+        }
+        Relationships: []
+      }
+      grievances: {
+        Row: {
+          ai_decision: string | null
+          ai_reasoning: string | null
+          ai_reviewed_at: string | null
+          approved_medications: string[] | null
+          created_at: string
+          denied_medications: string[] | null
+          document_url: string | null
+          explanation: string
+          id: string
+          prescription_id: string
+          reviewed_at: string | null
+          reviewer_notes: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          ai_decision?: string | null
+          ai_reasoning?: string | null
+          ai_reviewed_at?: string | null
+          approved_medications?: string[] | null
+          created_at?: string
+          denied_medications?: string[] | null
+          document_url?: string | null
+          explanation: string
+          id?: string
+          prescription_id: string
+          reviewed_at?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          ai_decision?: string | null
+          ai_reasoning?: string | null
+          ai_reviewed_at?: string | null
+          approved_medications?: string[] | null
+          created_at?: string
+          denied_medications?: string[] | null
+          document_url?: string | null
+          explanation?: string
+          id?: string
+          prescription_id?: string
+          reviewed_at?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grievances_prescription_id_fkey"
+            columns: ["prescription_id"]
+            isOneToOne: false
+            referencedRelation: "prescriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kidney_claims: {
+        Row: {
+          created_at: string
+          current_stage: number
+          final_diagnosis: string | null
+          id: string
+          patient_id: string
+          patient_name: string
+          stage_1_completed: boolean | null
+          stage_1_document_url: string | null
+          stage_2_completed: boolean | null
+          stage_2_document_url: string | null
+          stage_3_completed: boolean | null
+          stage_3_document_url: string | null
+          stage_4_completed: boolean | null
+          stage_4_document_url: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_stage?: number
+          final_diagnosis?: string | null
+          id?: string
+          patient_id: string
+          patient_name: string
+          stage_1_completed?: boolean | null
+          stage_1_document_url?: string | null
+          stage_2_completed?: boolean | null
+          stage_2_document_url?: string | null
+          stage_3_completed?: boolean | null
+          stage_3_document_url?: string | null
+          stage_4_completed?: boolean | null
+          stage_4_document_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_stage?: number
+          final_diagnosis?: string | null
+          id?: string
+          patient_id?: string
+          patient_name?: string
+          stage_1_completed?: boolean | null
+          stage_1_document_url?: string | null
+          stage_2_completed?: boolean | null
+          stage_2_document_url?: string | null
+          stage_3_completed?: boolean | null
+          stage_3_document_url?: string | null
+          stage_4_completed?: boolean | null
+          stage_4_document_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      lab_tests: {
+        Row: {
+          created_at: string
+          file_url: string | null
+          id: string
+          notes: string | null
+          patient_id: string
+          patient_name: string
+          result: string | null
+          test_date: string
+          test_name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          notes?: string | null
+          patient_id: string
+          patient_name: string
+          result?: string | null
+          test_date: string
+          test_name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          notes?: string | null
+          patient_id?: string
+          patient_name?: string
+          result?: string | null
+          test_date?: string
+          test_name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      medical_scans: {
+        Row: {
+          created_at: string
+          file_url: string | null
+          findings: string | null
+          id: string
+          notes: string | null
+          patient_id: string
+          patient_name: string
+          scan_date: string
+          scan_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_url?: string | null
+          findings?: string | null
+          id?: string
+          notes?: string | null
+          patient_id: string
+          patient_name: string
+          scan_date: string
+          scan_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          file_url?: string | null
+          findings?: string | null
+          id?: string
+          notes?: string | null
+          patient_id?: string
+          patient_name?: string
+          scan_date?: string
+          scan_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      patients: {
+        Row: {
+          created_at: string
+          id: string
+          patient_id: string
+          patient_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          patient_id: string
+          patient_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          patient_id?: string
+          patient_name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      prescription_codes: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+        }
+        Relationships: []
+      }
+      prescription_drugs: {
+        Row: {
+          created_at: string
+          drug_id: string
+          id: string
+          prescription_id: string
+          quantity: number
+        }
+        Insert: {
+          created_at?: string
+          drug_id: string
+          id?: string
+          prescription_id: string
+          quantity?: number
+        }
+        Update: {
+          created_at?: string
+          drug_id?: string
+          id?: string
+          prescription_id?: string
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prescription_drugs_drug_id_fkey"
+            columns: ["drug_id"]
+            isOneToOne: false
+            referencedRelation: "drugs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prescription_drugs_prescription_id_fkey"
+            columns: ["prescription_id"]
+            isOneToOne: false
+            referencedRelation: "prescriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prescriptions: {
+        Row: {
+          created_at: string
+          id: string
+          insurance_decision: string | null
+          insurance_id: string | null
+          insurance_message: string | null
+          insurance_tier: string | null
+          patient_id: string
+          patient_name: string
+          prescription_code: string | null
+          processing_time: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          insurance_decision?: string | null
+          insurance_id?: string | null
+          insurance_message?: string | null
+          insurance_tier?: string | null
+          patient_id: string
+          patient_name: string
+          prescription_code?: string | null
+          processing_time?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          insurance_decision?: string | null
+          insurance_id?: string | null
+          insurance_message?: string | null
+          insurance_tier?: string | null
+          patient_id?: string
+          patient_name?: string
+          prescription_code?: string | null
+          processing_time?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
