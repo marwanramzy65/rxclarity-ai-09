@@ -233,6 +233,28 @@ function calculateInsuranceTierDistribution(prescriptions: any[]) {
   }));
 }
 
+function parseProcessingTimeToSeconds(processingTime: string): number | null {
+  // Handle "X milliseconds" format
+  const msMatch = processingTime.match(/(\d+)\s*milliseconds?/i);
+  if (msMatch) {
+    return parseInt(msMatch[1]) / 1000;
+  }
+  
+  // Handle "HH:MM:SS" format as fallback
+  const timeMatch = processingTime.match(/(\d+):(\d+):(\d+\.?\d*)/);
+  if (timeMatch) {
+    return parseInt(timeMatch[1]) * 3600 + parseInt(timeMatch[2]) * 60 + parseFloat(timeMatch[3]);
+  }
+  
+  // Handle "X seconds" format
+  const secMatch = processingTime.match(/(\d+\.?\d*)\s*seconds?/i);
+  if (secMatch) {
+    return parseFloat(secMatch[1]);
+  }
+  
+  return null;
+}
+
 function calculateProcessingInsights(prescriptions: any[]) {
   const tierTimes: { [key: string]: number[] } = {};
   const hourCounts: { [key: number]: number } = {};
@@ -241,9 +263,8 @@ function calculateProcessingInsights(prescriptions: any[]) {
     // Processing time by tier
     if (prescription.processing_time && prescription.insurance_tier) {
       const tier = prescription.insurance_tier;
-      const timeMatch = prescription.processing_time.match(/(\d+):(\d+):(\d+\.?\d*)/);
-      if (timeMatch) {
-        const seconds = parseInt(timeMatch[1]) * 3600 + parseInt(timeMatch[2]) * 60 + parseFloat(timeMatch[3]);
+      const seconds = parseProcessingTimeToSeconds(prescription.processing_time);
+      if (seconds !== null) {
         if (!tierTimes[tier]) tierTimes[tier] = [];
         tierTimes[tier].push(seconds);
       }
@@ -258,7 +279,7 @@ function calculateProcessingInsights(prescriptions: any[]) {
     const avgSeconds = times.reduce((a, b) => a + b, 0) / times.length;
     return {
       tier,
-      avgTime: `${Math.floor(avgSeconds)}s`
+      avgTime: formatProcessingTime(avgSeconds)
     };
   });
   
@@ -268,6 +289,16 @@ function calculateProcessingInsights(prescriptions: any[]) {
     .slice(0, 3);
   
   return { averageByTier, peakHours };
+}
+
+function formatProcessingTime(seconds: number): string {
+  if (seconds < 1) {
+    return `${Math.round(seconds * 1000)}ms`;
+  } else if (seconds < 60) {
+    return `${seconds.toFixed(1)}s`;
+  } else {
+    return `${Math.floor(seconds / 60)}m ${Math.round(seconds % 60)}s`;
+  }
 }
 
 function calculateInteractionAnalysis(prescriptions: any[]) {
@@ -312,9 +343,8 @@ function calculatePerformanceMetrics(prescriptions: any[]) {
   
   prescriptions.forEach(prescription => {
     if (prescription.processing_time) {
-      const timeMatch = prescription.processing_time.match(/(\d+):(\d+):(\d+\.?\d*)/);
-      if (timeMatch) {
-        const seconds = parseInt(timeMatch[1]) * 3600 + parseInt(timeMatch[2]) * 60 + parseFloat(timeMatch[3]);
+      const seconds = parseProcessingTimeToSeconds(prescription.processing_time);
+      if (seconds !== null) {
         times.push(seconds);
       }
     }
@@ -335,9 +365,9 @@ function calculatePerformanceMetrics(prescriptions: any[]) {
   
   return {
     totalProcessed: prescriptions.length,
-    avgProcessingTime: `${Math.floor(avgTime)}s`,
-    quickestProcess: `${Math.floor(quickest)}s`,
-    slowestProcess: `${Math.floor(slowest)}s`
+    avgProcessingTime: formatProcessingTime(avgTime),
+    quickestProcess: formatProcessingTime(quickest),
+    slowestProcess: formatProcessingTime(slowest)
   };
 }
 
