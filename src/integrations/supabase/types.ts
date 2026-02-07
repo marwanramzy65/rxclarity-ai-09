@@ -63,23 +63,29 @@ export type Database = {
       }
       drugs: {
         Row: {
+          category: string | null
           created_at: string
           generic_name: string | null
           id: string
+          manufacturer: string | null
           name: string
           strength: string
         }
         Insert: {
+          category?: string | null
           created_at?: string
           generic_name?: string | null
           id?: string
+          manufacturer?: string | null
           name: string
           strength: string
         }
         Update: {
+          category?: string | null
           created_at?: string
           generic_name?: string | null
           id?: string
+          manufacturer?: string | null
           name?: string
           strength?: string
         }
@@ -420,6 +426,33 @@ export type Database = {
           prescription_code?: string | null
           processing_time?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          first_name: string | null
+          id: string
+          last_name: string | null
+          pharmacy_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          first_name?: string | null
+          id: string
+          last_name?: string | null
+          pharmacy_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          pharmacy_name?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
