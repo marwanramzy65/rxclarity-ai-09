@@ -188,7 +188,7 @@ export default function PatientHistory() {
                       </div>
                       <Badge variant={
                         prescription.insurance_decision === 'approved' ? 'default' :
-                        prescription.insurance_decision === 'denied' ? 'destructive' : 'secondary'
+                          prescription.insurance_decision === 'denied' ? 'destructive' : 'secondary'
                       }>
                         {prescription.insurance_decision === 'approved' ? (
                           <CheckCircle className="h-3 w-3 mr-1" />
@@ -237,9 +237,9 @@ export default function PatientHistory() {
                         </p>
                       </div>
                       {test.file_url && (
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={async () => {
                             const { data } = await supabase.storage
                               .from('lab-tests')
@@ -295,9 +295,9 @@ export default function PatientHistory() {
                         </p>
                       </div>
                       {scan.file_url && (
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={async () => {
                             const { data } = await supabase.storage
                               .from('medical-scans')
@@ -353,7 +353,7 @@ export default function PatientHistory() {
                       </div>
                       <Badge variant={
                         claim.status === 'completed' ? 'default' :
-                        claim.status === 'in_progress' ? 'secondary' : 'outline'
+                          claim.status === 'in_progress' ? 'secondary' : 'outline'
                       }>
                         {claim.status}
                       </Badge>
@@ -364,7 +364,7 @@ export default function PatientHistory() {
                       <div>
                         <p className="text-sm font-semibold">Current Stage: {claim.current_stage}/4</p>
                       </div>
-                      
+
                       <div className="grid grid-cols-2 gap-2">
                         <div className="flex items-center gap-2">
                           {claim.stage_1_completed ? (
@@ -416,12 +416,12 @@ export default function PatientHistory() {
           {/* Add Records Tab */}
           <TabsContent value="add" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <AddLabTestForm 
+              <AddLabTestForm
                 patientId={patientData.patient_id}
                 patientName={patientData.patient_name}
                 onSuccess={refetch}
               />
-              <AddMedicalScanForm 
+              <AddMedicalScanForm
                 patientId={patientData.patient_id}
                 patientName={patientData.patient_name}
                 onSuccess={refetch}

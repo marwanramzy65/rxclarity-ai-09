@@ -91,7 +91,7 @@ const Landing = () => {
                 <span className="text-primary-glow">Insurance Claims</span>
               </h1>
               <p className="text-lg md:text-xl text-white/90 mb-8 leading-relaxed max-w-lg">
-                AI-powered pharmaceutical insurance processing with automated claims approval 
+                AI-powered pharmaceutical insurance processing with automated claims approval
                 and drug interaction safety checks. Process claims in seconds, not hours.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
@@ -105,9 +105,9 @@ const Landing = () => {
               </div>
             </div>
             <div className="relative animate-slide-in-right">
-              <img 
-                src={heroImage} 
-                alt="PharmaVerse Dashboard" 
+              <img
+                src={heroImage}
+                alt="PharmaVerse Dashboard"
                 className="rounded-2xl shadow-elevated w-full"
               />
               <div className="absolute -bottom-6 -left-6 bg-card rounded-xl p-4 shadow-elevated border animate-float">

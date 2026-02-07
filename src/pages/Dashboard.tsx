@@ -35,11 +35,11 @@ const Dashboard = () => {
                 PharmaVerse
               </span>
             </div>
-            
+
             <div className="flex items-center space-x-2 sm:space-x-4">
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => navigate('/patients')}
                 className="hidden sm:flex"
               >
@@ -64,28 +64,28 @@ const Dashboard = () => {
       {/* Mobile Bottom Navigation */}
       <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-50 glass border-t border-border">
         <div className="grid grid-cols-4 h-16">
-          <button 
+          <button
             onClick={() => setActiveTab("new-prescription")}
             className={`flex flex-col items-center justify-center space-y-1 transition-colors ${activeTab === 'new-prescription' ? 'text-primary' : 'text-muted-foreground'}`}
           >
             <Plus className="h-5 w-5" />
             <span className="text-[10px]">New Rx</span>
           </button>
-          <button 
+          <button
             onClick={() => setActiveTab("history")}
             className={`flex flex-col items-center justify-center space-y-1 transition-colors ${activeTab === 'history' ? 'text-primary' : 'text-muted-foreground'}`}
           >
             <History className="h-5 w-5" />
             <span className="text-[10px]">History</span>
           </button>
-          <button 
+          <button
             onClick={() => setActiveTab("diagnosis-claims")}
             className={`flex flex-col items-center justify-center space-y-1 transition-colors ${activeTab === 'diagnosis-claims' ? 'text-primary' : 'text-muted-foreground'}`}
           >
             <Activity className="h-5 w-5" />
             <span className="text-[10px]">Claims</span>
           </button>
-          <button 
+          <button
             onClick={() => navigate('/patients')}
             className="flex flex-col items-center justify-center space-y-1 text-muted-foreground transition-colors"
           >
@@ -171,8 +171,8 @@ const Dashboard = () => {
 
         {/* View More Analytics Button */}
         <div className="flex justify-center mb-6 sm:mb-8">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => setDetailedStatsOpen(true)}
             className="bg-gradient-card border-primary/20 hover:bg-primary/5"
           >
@@ -241,11 +241,11 @@ const Dashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
-      
+
       {/* Detailed Stats Modal */}
-      <DetailedStatsModal 
-        open={detailedStatsOpen} 
-        onOpenChange={setDetailedStatsOpen} 
+      <DetailedStatsModal
+        open={detailedStatsOpen}
+        onOpenChange={setDetailedStatsOpen}
       />
     </div>
   );

@@ -124,7 +124,7 @@ const Auth = () => {
       {/* Decorative elements */}
       <div className="absolute top-20 left-10 w-72 h-72 bg-white/5 rounded-full blur-3xl" />
       <div className="absolute bottom-20 right-10 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-      
+
       <div className="w-full max-w-md relative z-10">
         <div className="mb-8 text-center animate-fade-in-up">
           <Link to="/" className="inline-flex items-center text-white/80 hover:text-white transition-colors mb-6 text-sm">
@@ -142,8 +142,8 @@ const Auth = () => {
           <CardHeader className="text-center pb-4">
             <CardTitle className="text-2xl">{isLogin ? "Welcome Back" : "Create Account"}</CardTitle>
             <CardDescription>
-              {isLogin 
-                ? "Sign in to access your pharmacy dashboard" 
+              {isLogin
+                ? "Sign in to access your pharmacy dashboard"
                 : "Join PharmaVerse to streamline your operations"
               }
             </CardDescription>
@@ -155,22 +155,22 @@ const Auth = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="firstName">First Name</Label>
-                      <Input 
+                      <Input
                         id="firstName"
                         value={formData.firstName}
                         onChange={handleInputChange}
-                        placeholder="John" 
+                        placeholder="John"
                         className="border-input focus:ring-primary"
                         required
                       />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="lastName">Last Name</Label>
-                      <Input 
+                      <Input
                         id="lastName"
                         value={formData.lastName}
                         onChange={handleInputChange}
-                        placeholder="Doe" 
+                        placeholder="Doe"
                         className="border-input focus:ring-primary"
                         required
                       />
@@ -178,34 +178,34 @@ const Auth = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="pharmacy">Pharmacy Name</Label>
-                    <Input 
+                    <Input
                       id="pharmacyName"
                       value={formData.pharmacyName}
                       onChange={handleInputChange}
-                      placeholder="Your Pharmacy Name" 
+                      placeholder="Your Pharmacy Name"
                       className="border-input focus:ring-primary"
                       required
                     />
                   </div>
                 </>
               )}
-              
+
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input 
+                <Input
                   id="email"
                   type="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  placeholder="pharmacist@example.com" 
+                  placeholder="pharmacist@example.com"
                   className="border-input focus:ring-primary"
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
-                <Input 
+                <Input
                   id="password"
                   type="password"
                   value={formData.password}
@@ -218,7 +218,7 @@ const Auth = () => {
               {!isLogin && (
                 <div className="space-y-2">
                   <Label htmlFor="confirmPassword">Confirm Password</Label>
-                  <Input 
+                  <Input
                     id="confirmPassword"
                     type="password"
                     value={formData.confirmPassword}
@@ -229,8 +229,8 @@ const Auth = () => {
                 </div>
               )}
 
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={loading}
                 className="w-full bg-gradient-primary shadow-medical"
                 size="lg"
@@ -248,10 +248,10 @@ const Auth = () => {
                   <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
                 </div>
               </div>
-              
-              <Button 
+
+              <Button
                 type="button"
-                variant="outline" 
+                variant="outline"
                 onClick={handleGoogleSignIn}
                 disabled={loading}
                 className="w-full mt-4"
@@ -283,8 +283,8 @@ const Auth = () => {
               <p className="text-muted-foreground">
                 {isLogin ? "Don't have an account?" : "Already have an account?"}
               </p>
-              <Button 
-                variant="link" 
+              <Button
+                variant="link"
                 onClick={() => setIsLogin(!isLogin)}
                 className="text-primary hover:text-primary-glow p-0"
               >
