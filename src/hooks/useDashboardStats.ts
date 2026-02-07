@@ -92,8 +92,14 @@ export const useDashboardStats = () => {
         const totalSeconds = prescriptionsWithTime.reduce((sum, p) => {
           if (!p.processing_time) return sum;
           
-          // Parse interval format like "00:00:02.345" or "2.345 seconds"
+          // Parse interval format like "00:00:02.345", "5552 milliseconds", or "2.345 seconds"
           const timeStr = p.processing_time.toString();
+          
+          // Handle "X milliseconds" format
+          const msMatch = timeStr.match(/(\d+)\s*milliseconds?/i);
+          if (msMatch) {
+            return sum + (parseInt(msMatch[1]) / 1000);
+          }
           
           if (timeStr.includes(':')) {
             // Format: "00:00:02.345"
