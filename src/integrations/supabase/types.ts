@@ -106,6 +106,7 @@ export type Database = {
           reviewed_at: string | null
           reviewer_notes: string | null
           status: string
+          updated_at: string | null
           user_id: string
         }
         Insert: {
@@ -122,6 +123,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewer_notes?: string | null
           status?: string
+          updated_at?: string | null
           user_id: string
         }
         Update: {
@@ -138,6 +140,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewer_notes?: string | null
           status?: string
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: [
