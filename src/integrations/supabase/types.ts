@@ -399,6 +399,7 @@ export type Database = {
           patient_name: string
           prescription_code: string | null
           processing_time: string | null
+          updated_at: string | null
           user_id: string
         }
         Insert: {
@@ -412,6 +413,7 @@ export type Database = {
           patient_name: string
           prescription_code?: string | null
           processing_time?: string | null
+          updated_at?: string | null
           user_id: string
         }
         Update: {
@@ -425,6 +427,7 @@ export type Database = {
           patient_name?: string
           prescription_code?: string | null
           processing_time?: string | null
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []
