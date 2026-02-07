@@ -5,9 +5,27 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Search, User, Eye, Plus, Loader2, ArrowLeft } from 'lucide-react';
+import { Search, User, Eye, Plus, Loader2, ArrowLeft, Users } from 'lucide-react';
 import { toast } from 'sonner';
+
+const getInitials = (name: string) => {
+  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+};
+
+const avatarColors = [
+  'bg-primary/15 text-primary',
+  'bg-success/15 text-success',
+  'bg-warning/15 text-warning',
+  'bg-destructive/15 text-destructive',
+  'bg-accent/15 text-accent',
+];
+
+const getAvatarColor = (name: string) => {
+  const index = name.charCodeAt(0) % avatarColors.length;
+  return avatarColors[index];
+};
 
 const Patients = () => {
   const navigate = useNavigate();
@@ -81,106 +99,118 @@ const Patients = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => navigate('/dashboard')}
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <h1 className="text-4xl font-bold">Patients</h1>
-          </div>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button onClick={() => {
-                setSelectedPatient(null);
-                setFormData({
-                  patient_id: '',
-                  patient_name: '',
-                  age: '',
-                  address: '',
-                  phone: '',
-                  email: ''
-                });
-              }}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Patient
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b glass sticky top-0 z-50">
+        <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate('/dashboard')}
+              >
+                <ArrowLeft className="h-4 w-4" />
               </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>{selectedPatient ? 'Edit Patient' : 'Add New Patient'}</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="patient_id">Patient ID *</Label>
-                    <Input
-                      id="patient_id"
-                      value={formData.patient_id}
-                      onChange={(e) => setFormData({ ...formData, patient_id: e.target.value })}
-                      required
-                      disabled={!!selectedPatient}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="patient_name">Patient Name *</Label>
-                    <Input
-                      id="patient_name"
-                      value={formData.patient_name}
-                      onChange={(e) => setFormData({ ...formData, patient_name: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="age">Age</Label>
-                    <Input
-                      id="age"
-                      type="number"
-                      value={formData.age}
-                      onChange={(e) => setFormData({ ...formData, age: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="phone">Phone</Label>
-                    <Input
-                      id="phone"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    />
-                  </div>
-                  <div className="col-span-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    />
-                  </div>
-                  <div className="col-span-2">
-                    <Label htmlFor="address">Address</Label>
-                    <Input
-                      id="address"
-                      value={formData.address}
-                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    />
-                  </div>
-                </div>
-                <Button type="submit" disabled={isAddingPatient}>
-                  {isAddingPatient ? 'Saving...' : 'Save Patient'}
+              <div className="flex items-center gap-3">
+                <h1 className="text-xl sm:text-2xl font-bold">Patients</h1>
+                <Badge variant="secondary" className="text-xs">
+                  {patients.length} total
+                </Badge>
+              </div>
+            </div>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button onClick={() => {
+                  setSelectedPatient(null);
+                  setFormData({
+                    patient_id: '',
+                    patient_name: '',
+                    age: '',
+                    address: '',
+                    phone: '',
+                    email: ''
+                  });
+                }}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  <span className="hidden sm:inline">Add Patient</span>
+                  <span className="sm:hidden">Add</span>
                 </Button>
-              </form>
-            </DialogContent>
-          </Dialog>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>{selectedPatient ? 'Edit Patient' : 'Add New Patient'}</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="patient_id">Patient ID *</Label>
+                      <Input
+                        id="patient_id"
+                        value={formData.patient_id}
+                        onChange={(e) => setFormData({ ...formData, patient_id: e.target.value })}
+                        required
+                        disabled={!!selectedPatient}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="patient_name">Patient Name *</Label>
+                      <Input
+                        id="patient_name"
+                        value={formData.patient_name}
+                        onChange={(e) => setFormData({ ...formData, patient_name: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="age">Age</Label>
+                      <Input
+                        id="age"
+                        type="number"
+                        value={formData.age}
+                        onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="phone">Phone</Label>
+                      <Input
+                        id="phone"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <Label htmlFor="address">Address</Label>
+                      <Input
+                        id="address"
+                        value={formData.address}
+                        onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <Button type="submit" disabled={isAddingPatient} className="w-full">
+                    {isAddingPatient ? 'Saving...' : 'Save Patient'}
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
+      </header>
 
-        <Card className="mb-6">
-          <CardContent className="pt-6">
+      <div className="container mx-auto px-4 sm:px-6 py-6 max-w-5xl">
+        {/* Search */}
+        <Card className="mb-6 shadow-card-medical border-0">
+          <CardContent className="pt-6 pb-4">
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
@@ -190,27 +220,42 @@ const Patients = () => {
                 className="pl-10"
               />
             </div>
+            {searchQuery && (
+              <p className="text-xs text-muted-foreground mt-2">
+                {filteredPatients.length} result{filteredPatients.length !== 1 ? 's' : ''} found
+              </p>
+            )}
           </CardContent>
         </Card>
 
-        <div className="grid gap-6">
+        <div className="grid gap-4">
           {filteredPatients.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <User className="h-12 w-12 text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">
+            <Card className="border-0 shadow-card-medical">
+              <CardContent className="flex flex-col items-center justify-center py-16">
+                <div className="bg-muted rounded-full p-4 mb-4">
+                  <Users className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <p className="text-muted-foreground font-medium">
                   {searchQuery ? 'No patients found matching your search' : 'No patients yet'}
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {searchQuery ? 'Try a different search term' : 'Add your first patient to get started'}
                 </p>
               </CardContent>
             </Card>
           ) : (
-            filteredPatients.map((patient) => (
-              <Card key={patient.id}>
-                <CardHeader>
+            filteredPatients.map((patient, index) => (
+              <Card key={patient.id} className="border-0 shadow-card-medical hover-lift animate-fade-in-up" style={{ animationDelay: `${index * 50}ms` }}>
+                <CardHeader className="pb-3">
                   <CardTitle className="flex justify-between items-center">
                     <div className="flex items-center gap-3">
-                      <User className="h-5 w-5" />
-                      <span>{patient.patient_name}</span>
+                      <div className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold ${getAvatarColor(patient.patient_name)}`}>
+                        {getInitials(patient.patient_name)}
+                      </div>
+                      <div>
+                        <span className="text-base">{patient.patient_name}</span>
+                        <p className="text-xs text-muted-foreground font-normal">ID: {patient.patient_id}</p>
+                      </div>
                     </div>
                     <div className="flex gap-2">
                       <Dialog>
@@ -294,34 +339,30 @@ const Patients = () => {
                     </div>
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-0">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Patient ID</p>
-                      <p className="font-medium">{patient.patient_id}</p>
-                    </div>
                     {patient.age && (
                       <div>
-                        <p className="text-sm text-muted-foreground">Age</p>
-                        <p className="font-medium">{patient.age}</p>
+                        <p className="text-xs text-muted-foreground">Age</p>
+                        <p className="font-medium text-sm">{patient.age}</p>
                       </div>
                     )}
                     {patient.phone && (
                       <div>
-                        <p className="text-sm text-muted-foreground">Phone</p>
-                        <p className="font-medium">{patient.phone}</p>
+                        <p className="text-xs text-muted-foreground">Phone</p>
+                        <p className="font-medium text-sm">{patient.phone}</p>
                       </div>
                     )}
                     {patient.email && (
                       <div>
-                        <p className="text-sm text-muted-foreground">Email</p>
-                        <p className="font-medium">{patient.email}</p>
+                        <p className="text-xs text-muted-foreground">Email</p>
+                        <p className="font-medium text-sm">{patient.email}</p>
                       </div>
                     )}
                     {patient.address && (
                       <div className="col-span-2">
-                        <p className="text-sm text-muted-foreground">Address</p>
-                        <p className="font-medium">{patient.address}</p>
+                        <p className="text-xs text-muted-foreground">Address</p>
+                        <p className="font-medium text-sm">{patient.address}</p>
                       </div>
                     )}
                   </div>

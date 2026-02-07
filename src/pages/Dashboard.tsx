@@ -24,14 +24,14 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20 sm:pb-0">
       {/* Header */}
-      <header className="border-b bg-card shadow-card-medical sticky top-0 z-50">
+      <header className="border-b glass shadow-card-medical sticky top-0 z-50">
         <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Pill className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
-              <span className="text-lg sm:text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+              <span className="text-lg sm:text-2xl font-bold text-gradient">
                 PharmaVerse
               </span>
             </div>
@@ -46,8 +46,10 @@ const Dashboard = () => {
                 <Users className="h-4 w-4 mr-2" />
                 Patients
               </Button>
-              <div className="hidden sm:flex items-center space-x-2 text-sm text-muted-foreground">
-                <User className="h-4 w-4" />
+              <div className="hidden sm:flex items-center space-x-2 text-sm text-muted-foreground bg-muted rounded-full px-3 py-1.5">
+                <div className="bg-primary/10 rounded-full p-1">
+                  <User className="h-3 w-3 text-primary" />
+                </div>
                 <span className="truncate max-w-32 lg:max-w-none">{user?.email || 'Pharmacist'}</span>
               </div>
               <Button variant="ghost" size="sm" onClick={handleLogout}>
@@ -59,16 +61,50 @@ const Dashboard = () => {
         </div>
       </header>
 
+      {/* Mobile Bottom Navigation */}
+      <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-50 glass border-t border-border">
+        <div className="grid grid-cols-4 h-16">
+          <button 
+            onClick={() => setActiveTab("new-prescription")}
+            className={`flex flex-col items-center justify-center space-y-1 transition-colors ${activeTab === 'new-prescription' ? 'text-primary' : 'text-muted-foreground'}`}
+          >
+            <Plus className="h-5 w-5" />
+            <span className="text-[10px]">New Rx</span>
+          </button>
+          <button 
+            onClick={() => setActiveTab("history")}
+            className={`flex flex-col items-center justify-center space-y-1 transition-colors ${activeTab === 'history' ? 'text-primary' : 'text-muted-foreground'}`}
+          >
+            <History className="h-5 w-5" />
+            <span className="text-[10px]">History</span>
+          </button>
+          <button 
+            onClick={() => setActiveTab("diagnosis-claims")}
+            className={`flex flex-col items-center justify-center space-y-1 transition-colors ${activeTab === 'diagnosis-claims' ? 'text-primary' : 'text-muted-foreground'}`}
+          >
+            <Activity className="h-5 w-5" />
+            <span className="text-[10px]">Claims</span>
+          </button>
+          <button 
+            onClick={() => navigate('/patients')}
+            className="flex flex-col items-center justify-center space-y-1 text-muted-foreground transition-colors"
+          >
+            <Users className="h-5 w-5" />
+            <span className="text-[10px]">Patients</span>
+          </button>
+        </div>
+      </nav>
+
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
         {/* Welcome Section */}
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-2">Welcome back!</h1>
+        <div className="mb-6 sm:mb-8 animate-fade-in-up">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-1">Welcome back!</h1>
           <p className="text-sm sm:text-base text-muted-foreground">Process prescriptions and review insurance claims efficiently</p>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
-          <Card className="bg-gradient-card border-0 shadow-card-medical">
+          <Card className="bg-gradient-card border-0 shadow-card-medical hover-lift animate-fade-in-up">
             <CardContent className="p-3 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -77,14 +113,14 @@ const Dashboard = () => {
                     {loading ? "..." : error ? "Error" : stats.todaysClaims}
                   </p>
                 </div>
-                <div className="bg-primary/10 rounded-full p-2 sm:p-3">
+                <div className="bg-primary/10 rounded-xl p-2 sm:p-3">
                   <Plus className="h-4 w-4 sm:h-6 sm:w-6 text-primary" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-card border-0 shadow-card-medical">
+          <Card className="bg-gradient-card border-0 shadow-card-medical hover-lift animate-fade-in-up animation-delay-100">
             <CardContent className="p-3 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -100,7 +136,7 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-card border-0 shadow-card-medical">
+          <Card className="bg-gradient-card border-0 shadow-card-medical hover-lift animate-fade-in-up animation-delay-200">
             <CardContent className="p-3 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -109,21 +145,23 @@ const Dashboard = () => {
                     {loading ? "..." : error ? "Error" : stats.interactionsFound}
                   </p>
                 </div>
-                <AlertTriangle className="h-4 w-4 sm:h-6 sm:w-6 text-warning" />
+                <div className="bg-warning/10 rounded-xl p-2 sm:p-3">
+                  <AlertTriangle className="h-4 w-4 sm:h-6 sm:w-6 text-warning" />
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-card border-0 shadow-card-medical">
+          <Card className="bg-gradient-card border-0 shadow-card-medical hover-lift animate-fade-in-up animation-delay-300">
             <CardContent className="p-3 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs sm:text-sm text-muted-foreground">Avg. Processing Time</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Avg. Processing</p>
                   <p className="text-lg sm:text-2xl font-bold">
                     {loading ? "..." : error ? "Error" : stats.avgProcessingTime}
                   </p>
                 </div>
-                <div className="bg-success/10 rounded-full p-2 sm:p-3">
+                <div className="bg-success/10 rounded-xl p-2 sm:p-3">
                   <History className="h-4 w-4 sm:h-6 sm:w-6 text-success" />
                 </div>
               </div>

@@ -120,21 +120,26 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
-          <Link to="/" className="inline-flex items-center text-white hover:text-primary-glow transition-colors mb-4">
+    <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Decorative elements */}
+      <div className="absolute top-20 left-10 w-72 h-72 bg-white/5 rounded-full blur-3xl" />
+      <div className="absolute bottom-20 right-10 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+      
+      <div className="w-full max-w-md relative z-10">
+        <div className="mb-8 text-center animate-fade-in-up">
+          <Link to="/" className="inline-flex items-center text-white/80 hover:text-white transition-colors mb-6 text-sm">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Home
           </Link>
-          <div className="flex items-center justify-center space-x-2 mb-4">
-            <Pill className="h-8 w-8 text-white" />
-            <span className="text-2xl font-bold text-white">PharmaVerse</span>
+          <div className="flex items-center justify-center space-x-2 mb-2">
+            <Pill className="h-10 w-10 text-white animate-float" />
+            <span className="text-3xl font-bold text-white">PharmaVerse</span>
           </div>
+          <p className="text-white/60 text-sm">Secure pharmaceutical platform</p>
         </div>
 
-        <Card className="shadow-elevated border-0">
-          <CardHeader className="text-center">
+        <Card className="shadow-elevated border-0 animate-scale-in">
+          <CardHeader className="text-center pb-4">
             <CardTitle className="text-2xl">{isLogin ? "Welcome Back" : "Create Account"}</CardTitle>
             <CardDescription>
               {isLogin 

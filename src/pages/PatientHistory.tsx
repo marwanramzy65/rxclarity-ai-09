@@ -42,32 +42,37 @@ export default function PatientHistory() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto p-6 space-y-6">
+      <div className="container mx-auto p-4 sm:p-6 space-y-6 max-w-6xl">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-4">
-          <Button variant="ghost" onClick={() => navigate('/patients')}>
+        <div className="flex items-center gap-3 mb-4 animate-fade-in">
+          <Button variant="ghost" size="sm" onClick={() => navigate('/patients')}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Patients
+            Back
           </Button>
         </div>
 
         {/* Patient Profile Card */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-6 w-6 text-primary" />
-              Patient Profile
+        <Card className="mb-6 border-0 shadow-card-medical animate-fade-in-up">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-3">
+              <div className="bg-primary/10 rounded-full p-2.5">
+                <User className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <span>Patient Profile</span>
+                <p className="text-sm font-normal text-muted-foreground">{patientData.patient_name}</p>
+              </div>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               <div>
-                <p className="text-sm text-muted-foreground">Name</p>
-                <p className="font-semibold">{patientData.patient_name}</p>
+                <p className="text-xs text-muted-foreground">Name</p>
+                <p className="font-semibold text-sm">{patientData.patient_name}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Patient ID</p>
-                <p className="font-semibold">{patientData.patient_id}</p>
+                <p className="text-xs text-muted-foreground">Patient ID</p>
+                <p className="font-semibold text-sm">{patientData.patient_id}</p>
               </div>
               {patientData.age && (
                 <div>
@@ -98,57 +103,67 @@ export default function PatientHistory() {
         </Card>
 
         {/* Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="pt-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+          <Card className="border-0 shadow-card-medical hover-lift animate-fade-in-up">
+            <CardContent className="pt-5 pb-4">
               <div className="flex items-center gap-2 mb-2">
-                <Pill className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold">Prescriptions</h3>
+                <div className="bg-primary/10 rounded-lg p-1.5">
+                  <Pill className="h-4 w-4 text-primary" />
+                </div>
+                <h3 className="font-semibold text-sm">Prescriptions</h3>
               </div>
-              <p className="text-3xl font-bold">{patientData.prescriptions.length}</p>
+              <p className="text-2xl sm:text-3xl font-bold">{patientData.prescriptions.length}</p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="pt-6">
+          <Card className="border-0 shadow-card-medical hover-lift animate-fade-in-up animation-delay-100">
+            <CardContent className="pt-5 pb-4">
               <div className="flex items-center gap-2 mb-2">
-                <FileText className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold">Lab Tests</h3>
+                <div className="bg-success/10 rounded-lg p-1.5">
+                  <FileText className="h-4 w-4 text-success" />
+                </div>
+                <h3 className="font-semibold text-sm">Lab Tests</h3>
               </div>
-              <p className="text-3xl font-bold">{patientData.labTests.length}</p>
+              <p className="text-2xl sm:text-3xl font-bold">{patientData.labTests.length}</p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="pt-6">
+          <Card className="border-0 shadow-card-medical hover-lift animate-fade-in-up animation-delay-200">
+            <CardContent className="pt-5 pb-4">
               <div className="flex items-center gap-2 mb-2">
-                <Scan className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold">Medical Scans</h3>
+                <div className="bg-warning/10 rounded-lg p-1.5">
+                  <Scan className="h-4 w-4 text-warning" />
+                </div>
+                <h3 className="font-semibold text-sm">Scans</h3>
               </div>
-              <p className="text-3xl font-bold">{patientData.scans.length}</p>
+              <p className="text-2xl sm:text-3xl font-bold">{patientData.scans.length}</p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="pt-6">
+          <Card className="border-0 shadow-card-medical hover-lift animate-fade-in-up animation-delay-300">
+            <CardContent className="pt-5 pb-4">
               <div className="flex items-center gap-2 mb-2">
-                <Activity className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold">Diagnosis Claims</h3>
+                <div className="bg-destructive/10 rounded-lg p-1.5">
+                  <Activity className="h-4 w-4 text-destructive" />
+                </div>
+                <h3 className="font-semibold text-sm">Claims</h3>
               </div>
-              <p className="text-3xl font-bold">{patientData.kidneyDiagnosis.length}</p>
+              <p className="text-2xl sm:text-3xl font-bold">{patientData.kidneyDiagnosis.length}</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Main Content */}
         <Tabs defaultValue="prescriptions" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="prescriptions">Prescriptions</TabsTrigger>
-            <TabsTrigger value="lab-tests">Lab Tests</TabsTrigger>
-            <TabsTrigger value="scans">Medical Scans</TabsTrigger>
-            <TabsTrigger value="kidney">Diagnosis Claims</TabsTrigger>
-            <TabsTrigger value="add">Add Records</TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-5 h-11">
+              <TabsTrigger value="prescriptions" className="text-xs sm:text-sm whitespace-nowrap">Prescriptions</TabsTrigger>
+              <TabsTrigger value="lab-tests" className="text-xs sm:text-sm whitespace-nowrap">Lab Tests</TabsTrigger>
+              <TabsTrigger value="scans" className="text-xs sm:text-sm whitespace-nowrap">Scans</TabsTrigger>
+              <TabsTrigger value="kidney" className="text-xs sm:text-sm whitespace-nowrap">Claims</TabsTrigger>
+              <TabsTrigger value="add" className="text-xs sm:text-sm whitespace-nowrap">Add Records</TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Prescriptions Tab */}
           <TabsContent value="prescriptions" className="space-y-4">
