@@ -24,9 +24,9 @@ serve(async (req) => {
 
     console.log('Checking insurance coverage for:', { drugs, insuranceTier, patientInfo });
 
-    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
-    if (!lovableApiKey) {
-      throw new Error('Lovable API key not configured');
+    const llamaApiKey = Deno.env.get('LLAMA_API_TOKEN');
+    if (!llamaApiKey) {
+      throw new Error('Llama API key not configured');
     }
 
     // Format drugs list for the prompt
@@ -76,14 +76,14 @@ IMPORTANT:
 Analyze the following prescription and provide your response:
 ${drugsList}`;
 
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${lovableApiKey}`,
+        'Authorization': `Bearer ${llamaApiKey}`,
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.0-flash',
+        model: 'llama-3.3-70b-versatile',
         messages: [{
           role: 'user',
           content: prompt
@@ -95,18 +95,18 @@ ${drugsList}`;
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Lovable AI Gateway error:', response.status, response.statusText);
-      console.error('Lovable AI Gateway error details:', errorText);
-      throw new Error(`Lovable AI Gateway error: ${response.status} - ${errorText}`);
+      console.error('Groq API error:', response.status, response.statusText);
+      console.error('Groq API error details:', errorText);
+      throw new Error(`Groq API error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
-    console.log('Lovable AI Gateway response received');
+    console.log('Groq API response:', JSON.stringify(data, null, 2));
 
     // Extract the generated content
     const generatedText = data.choices?.[0]?.message?.content;
     if (!generatedText) {
-      throw new Error('No generated text received from Lovable AI Gateway');
+      throw new Error('No generated text received from Groq API');
     }
 
     // Parse the JSON response
@@ -154,7 +154,7 @@ ${drugsList}`;
       }
 
     } catch (parseError) {
-      console.error('Failed to parse AI response:', generatedText);
+      console.error('Failed to parse Groq response:', generatedText);
       console.error('Parse error:', (parseError as Error).message);
       // Fallback decision
       insuranceDecision = {
